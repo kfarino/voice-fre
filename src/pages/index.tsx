@@ -27,7 +27,7 @@ export default function Home() {
       addLog('Connecting to ElevenLabs...');
       setStatus('Connecting');
 
-      // Connect to ElevenLabs
+      // Connect directly to ElevenLabs
       const ws = new WebSocket(`wss://api.elevenlabs.io/v1/convai/conversation?xi-api-key=${apiKey}`);
       wsRef.current = ws;
 

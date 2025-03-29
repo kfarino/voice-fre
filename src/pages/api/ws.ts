@@ -1,10 +1,7 @@
 import { NextRequest } from 'next/server';
 
-const ELEVENLABS_WS_URL = 'wss://api.elevenlabs.io/v1/conversation-agents/fQnuI7Y9aX2P6hawdTuY/conversation-websocket';
-
 export const config = {
   runtime: 'edge',
-  regions: ['iad1'], // US East (N. Virginia)
 };
 
 export default async function handler(req: NextRequest) {
@@ -15,56 +12,19 @@ export default async function handler(req: NextRequest) {
     return new Response('API key is required', { status: 401 });
   }
 
-  const upgradeHeader = req.headers.get('upgrade');
-  if (!upgradeHeader || upgradeHeader.toLowerCase() !== 'websocket') {
-    return new Response('Expected WebSocket connection', { status: 426 });
-  }
-
   try {
-    const { 0: client, 1: server } = new WebSocketPair();
-
-    // Connect to ElevenLabs
-    const elevenlabsWs = new WebSocket(ELEVENLABS_WS_URL, {
-      headers: {
-        'xi-api-key': apiKey
-      }
-    });
-
-    // Forward messages from client to ElevenLabs
-    client.addEventListener('message', (event) => {
-      if (elevenlabsWs.readyState === WebSocket.OPEN) {
-        console.log('Forwarding to ElevenLabs:', event.data);
-        elevenlabsWs.send(event.data);
-      }
-    });
-
-    // Forward messages from ElevenLabs to client
-    elevenlabsWs.addEventListener('message', (event) => {
-      if (client.readyState === WebSocket.OPEN) {
-        console.log('Forwarding to client:', event.data);
-        client.send(event.data);
-      }
-    });
-
-    // Handle client disconnect
-    client.addEventListener('close', () => {
-      console.log('Client disconnected');
-      if (elevenlabsWs.readyState === WebSocket.OPEN) {
-        elevenlabsWs.close();
-      }
-    });
-
-    // Handle ElevenLabs disconnect
-    elevenlabsWs.addEventListener('close', (event) => {
-      console.log('ElevenLabs disconnected:', event.code, event.reason);
-      if (client.readyState === WebSocket.OPEN) {
-        client.close(event.code, event.reason);
-      }
-    });
-
+    // Connect directly to ElevenLabs WebSocket
+    const url = `wss://api.elevenlabs.io/v1/convai/conversation?xi-api-key=${apiKey}`;
+    
+    // Return upgrade response with headers
     return new Response(null, {
       status: 101,
-      webSocket: server,
+      headers: {
+        'Upgrade': 'websocket',
+        'Connection': 'Upgrade',
+        'Sec-WebSocket-Accept': req.headers.get('sec-websocket-key') || '',
+        'Sec-WebSocket-Protocol': 'websocket'
+      }
     });
   } catch (error) {
     console.error('WebSocket setup error:', error);
