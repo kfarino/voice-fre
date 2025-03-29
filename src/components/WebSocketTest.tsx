@@ -11,21 +11,29 @@ export default function WebSocketTest() {
     setLogs(prev => [...prev, `${new Date().toISOString()}: ${message}`]);
   };
 
-  const connect = () => {
+  const connect = async () => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       addLog('Already connected');
       return;
     }
 
-    addLog('Connecting to WebSocket server...');
+    addLog('Connecting to ElevenLabs...');
     setStatus('Connecting');
     
     try {
-      const socket = new WebSocket(`ws://${window.location.host}/ws`);
-      wsRef.current = socket;
+      // Get the API key from the server
+      const response = await fetch('/api/get-credentials');
+      if (!response.ok) {
+        throw new Error('Failed to get API credentials');
+      }
+      const { apiKey } = await response.json();
 
-      socket.onopen = () => {
-        addLog('✅ Connected to WebSocket server');
+      // Connect directly to ElevenLabs
+      const ws = new WebSocket(`wss://api.elevenlabs.io/v1/convai/conversation?xi-api-key=${apiKey}`);
+      wsRef.current = ws;
+
+      ws.onopen = () => {
+        addLog('✅ Connected to ElevenLabs');
         setStatus('Connected');
 
         // Initialize AudioContext
@@ -35,21 +43,29 @@ export default function WebSocketTest() {
           });
         }
 
-        // Send initial configuration
+        // Send initial configuration according to ElevenLabs docs
         const config = {
-          type: 'start',
-          data: {
-            agentId: 'fQnuI7Y9aX2P6hawdTuY',
-            userMessage: 'Hello'
+          type: "conversation_initiation_client_data",
+          conversation_config_override: {
+            agent: {
+              prompt: {
+                prompt: "You are a helpful assistant."
+              },
+              first_message: "Hello! How can I help you today?",
+              language: "en"
+            },
+            tts: {
+              voice_id: "21m00Tcm4TlvDq8ikWAM"
+            }
           }
         };
-        socket.send(JSON.stringify(config));
+        ws.send(JSON.stringify(config));
         addLog('📤 Sent initial configuration');
       };
 
-      socket.onmessage = async (event) => {
+      ws.onmessage = async (event: MessageEvent) => {
         try {
-          addLog(`📥 Raw message received: ${event.data}`);
+          addLog(`📥 Raw message received`);
           
           if (event.data instanceof Blob) {
             // Handle audio data
@@ -67,25 +83,35 @@ export default function WebSocketTest() {
             // Handle control messages
             const message = JSON.parse(event.data);
             addLog(`📥 Parsed message: ${JSON.stringify(message, null, 2)}`);
+
+            // Handle ping messages
+            if (message.type === 'ping') {
+              const pong = {
+                type: 'pong',
+                event_id: message.ping_event.event_id
+              };
+              ws.send(JSON.stringify(pong));
+              addLog('📤 Sent pong response');
+            }
           }
         } catch (err) {
-          addLog(`❌ Error handling message: ${err}`);
+          addLog(`❌ Error handling message: ${err instanceof Error ? err.message : 'Unknown error'}`);
         }
       };
 
-      socket.onerror = (error) => {
-        addLog(`❌ WebSocket error: ${error}`);
+      ws.onerror = (error: Event) => {
+        addLog(`❌ WebSocket error: ${error.type}`);
         setStatus('Error');
       };
 
-      socket.onclose = (event) => {
+      ws.onclose = (event: CloseEvent) => {
         addLog(`🔌 WebSocket closed: Code ${event.code}, Reason: ${event.reason || 'none'}`);
         setStatus('Disconnected');
         wsRef.current = null;
       };
 
     } catch (err) {
-      addLog(`❌ Error creating WebSocket: ${err}`);
+      addLog(`❌ Error creating WebSocket: ${err instanceof Error ? err.message : 'Unknown error'}`);
       setStatus('Error');
     }
   };
@@ -116,19 +142,16 @@ export default function WebSocketTest() {
         int16Data[i] = audioData[i] * 32767;
       }
 
-      // Create the message
+      // Create the message according to ElevenLabs docs
+      const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(int16Data.buffer)));
       const message = {
-        type: "audio",
-        data: {
-          audio: Array.from(int16Data),
-          sequence_id: Date.now().toString()
-        }
+        user_audio_chunk: audioBase64
       };
 
       wsRef.current.send(JSON.stringify(message));
       addLog('📤 Sent test audio data');
     } catch (err) {
-      addLog(`❌ Error sending audio: ${err}`);
+      addLog(`❌ Error sending audio: ${err instanceof Error ? err.message : 'Unknown error'}`);
     }
   };
 

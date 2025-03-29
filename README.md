@@ -1,4 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# ElevenLabs Voice Chat
+
+A Next.js application that demonstrates real-time voice chat using ElevenLabs' WebSocket API.
+
+## Features
+
+- Real-time voice interaction with ElevenLabs AI
+- WebSocket-based communication
+- Audio streaming and playback
+- Status monitoring and debug logging
+
+## Setup
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file with your ElevenLabs API key:
+   ```
+   ELEVENLABS_API_KEY=your_api_key_here
+   NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_agent_id_here
+   ```
+4. Run the development server:
+   ```bash
+   npm run dev
+   ```
+
+## Environment Variables
+
+- `ELEVENLABS_API_KEY`: Your ElevenLabs API key
+- `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`: The ID of your ElevenLabs agent
+
+## Development
+
+The application uses:
+- Next.js for the framework
+- WebSocket for real-time communication
+- Web Audio API for audio handling
+
+## Deployment
+
+This application is designed to be deployed on Vercel:
+
+1. Push your code to a Git repository
+2. Connect the repository to Vercel
+3. Add your environment variables in the Vercel dashboard
+4. Deploy!
 
 ## Getting Started
 
