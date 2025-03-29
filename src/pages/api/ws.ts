@@ -12,31 +12,46 @@ export default async function handler(req: NextRequest) {
     return new Response('Missing environment variables', { status: 500 })
   }
 
-  if (req.headers.get('upgrade') !== 'websocket') {
+  const upgradeHeader = req.headers.get('upgrade')?.toLowerCase()
+  if (upgradeHeader !== 'websocket') {
     return new Response('Expected Upgrade: websocket', { status: 426 })
   }
 
   try {
     const elevenlabsUrl = `wss://api.elevenlabs.io/v1/convai/agents/${agentId}/conversation`
-    const elevenlabsRes = await fetch(elevenlabsUrl, {
-      headers: {
-        'Upgrade': 'websocket',
-        'Connection': 'Upgrade',
-        'xi-api-key': apiKey,
-      }
+
+    // Get WebSocket-related headers
+    const socketKey = req.headers.get('sec-websocket-key')
+    const socketProtocol = req.headers.get('sec-websocket-protocol')
+    const socketVersion = req.headers.get('sec-websocket-version')
+
+    if (!socketKey || !socketVersion) {
+      return new Response('Missing required WebSocket headers', { status: 400 })
+    }
+
+    // Create WebSocket handshake response headers
+    const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
+    const acceptKey = btoa(String.fromCharCode(...new Uint8Array(
+      await crypto.subtle.digest('SHA-1', new TextEncoder().encode(socketKey + GUID))
+    )))
+
+    const headers = new Headers({
+      'Upgrade': 'websocket',
+      'Connection': 'Upgrade',
+      'Sec-WebSocket-Accept': acceptKey,
     })
 
-    // Forward the WebSocket upgrade
+    if (socketProtocol) {
+      headers.set('Sec-WebSocket-Protocol', socketProtocol)
+    }
+
+    // Create response with WebSocket upgrade
     return new Response(null, {
       status: 101,
-      headers: {
-        'Upgrade': 'websocket',
-        'Connection': 'Upgrade',
-        'Sec-WebSocket-Accept': req.headers.get('sec-websocket-key') || '',
-      }
+      headers
     })
   } catch (err) {
-    console.error('WebSocket connection error:', err)
+    console.error('WebSocket setup error:', err)
     return new Response('Failed to establish WebSocket connection', { status: 500 })
   }
 } 

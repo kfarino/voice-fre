@@ -23,11 +23,12 @@ export default function WebSocketTest() {
     try {
       // Connect to our Edge Function WebSocket endpoint
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const ws = new WebSocket(`${protocol}//${window.location.host}/api/ws`);
+      const host = window.location.host;
+      const ws = new WebSocket(`${protocol}//${host}/api/ws`);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        addLog('✅ Connected to WebSocket');
+        addLog('✅ Connected');
         setStatus('Connected');
 
         // Initialize AudioContext
@@ -116,6 +117,7 @@ export default function WebSocketTest() {
       wsRef.current.close();
       wsRef.current = null;
       setStatus('Disconnected');
+      addLog('Disconnected');
     }
   };
 
