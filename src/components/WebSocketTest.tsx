@@ -25,9 +25,18 @@ export default function WebSocketTest() {
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
       const host = window.location.host;
       const ws = new WebSocket(`${protocol}//${host}/api/ws`);
-      wsRef.current = ws;
+
+      // Set a connection timeout
+      const connectionTimeout = setTimeout(() => {
+        if (ws.readyState !== WebSocket.OPEN) {
+          ws.close();
+          addLog('❌ Connection timeout');
+          setStatus('Error');
+        }
+      }, 10000);
 
       ws.onopen = () => {
+        clearTimeout(connectionTimeout);
         addLog('✅ Connected');
         setStatus('Connected');
 
@@ -57,6 +66,8 @@ export default function WebSocketTest() {
         ws.send(JSON.stringify(config));
         addLog('📤 Sent initial configuration');
       };
+
+      wsRef.current = ws;
 
       ws.onmessage = async (event: MessageEvent) => {
         try {
@@ -95,14 +106,22 @@ export default function WebSocketTest() {
       };
 
       ws.onerror = (error: Event) => {
+        clearTimeout(connectionTimeout);
         addLog(`❌ WebSocket error: ${error.type}`);
         setStatus('Error');
       };
 
       ws.onclose = (event: CloseEvent) => {
+        clearTimeout(connectionTimeout);
         addLog(`🔌 WebSocket closed: Code ${event.code}, Reason: ${event.reason || 'none'}`);
         setStatus('Disconnected');
         wsRef.current = null;
+
+        // Attempt to reconnect if not manually disconnected
+        if (event.code === 1006) {
+          addLog('Attempting to reconnect in 3 seconds...');
+          setTimeout(connect, 3000);
+        }
       };
 
     } catch (err) {

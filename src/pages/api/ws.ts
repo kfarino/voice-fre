@@ -20,35 +20,27 @@ export default async function handler(req: NextRequest) {
   try {
     const elevenlabsUrl = `wss://api.elevenlabs.io/v1/convai/agents/${agentId}/conversation`
 
-    // Get WebSocket-related headers
-    const socketKey = req.headers.get('sec-websocket-key')
-    const socketProtocol = req.headers.get('sec-websocket-protocol')
-    const socketVersion = req.headers.get('sec-websocket-version')
-
-    if (!socketKey || !socketVersion) {
-      return new Response('Missing required WebSocket headers', { status: 400 })
-    }
-
-    // Create WebSocket handshake response headers
-    const GUID = '258EAFA5-E914-47DA-95CA-C5AB0DC85B11'
-    const acceptKey = btoa(String.fromCharCode(...new Uint8Array(
-      await crypto.subtle.digest('SHA-1', new TextEncoder().encode(socketKey + GUID))
-    )))
-
-    const headers = new Headers({
-      'Upgrade': 'websocket',
-      'Connection': 'Upgrade',
-      'Sec-WebSocket-Accept': acceptKey,
+    // Forward the WebSocket connection to ElevenLabs
+    const response = await fetch(elevenlabsUrl, {
+      method: 'GET',
+      headers: {
+        'Upgrade': 'websocket',
+        'Connection': 'Upgrade',
+        'Sec-WebSocket-Key': req.headers.get('sec-websocket-key') || '',
+        'Sec-WebSocket-Version': req.headers.get('sec-websocket-version') || '',
+        'Sec-WebSocket-Protocol': req.headers.get('sec-websocket-protocol') || '',
+        'xi-api-key': apiKey
+      }
     })
 
-    if (socketProtocol) {
-      headers.set('Sec-WebSocket-Protocol', socketProtocol)
-    }
+    // Forward the response headers from ElevenLabs
+    const responseHeaders = new Headers(response.headers)
+    responseHeaders.set('Upgrade', 'websocket')
+    responseHeaders.set('Connection', 'Upgrade')
 
-    // Create response with WebSocket upgrade
     return new Response(null, {
       status: 101,
-      headers
+      headers: responseHeaders
     })
   } catch (err) {
     console.error('WebSocket setup error:', err)
