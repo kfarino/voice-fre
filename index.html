@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ElevenLabs Widget Test</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+    }
+    #widget-container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="widget-container"></div>
+
+  <script>
+    (function() {
+      var script = document.createElement('script');
+      script.src = 'https://widget.elevenlabs.io/v1/widget.js';
+      script.async = true;
+      script.onload = function() {
+        console.log('Widget script loaded');
+        window.elevenlabs.widget.init({
+          container: '#widget-container',
+          agentId: 'fQnuI7Y9aX2P6hawdTuY',
+          apiKey: 'sk_0213e01aa4619e94097f3d0e1cb17c190ca6296e6366e751'
+        });
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
+</body>
+</html> 
