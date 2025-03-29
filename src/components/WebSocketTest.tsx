@@ -17,23 +17,17 @@ export default function WebSocketTest() {
       return;
     }
 
-    addLog('Connecting to ElevenLabs...');
+    addLog('Connecting to WebSocket...');
     setStatus('Connecting');
     
     try {
-      // Get the API key from the server
-      const response = await fetch('/api/get-credentials');
-      if (!response.ok) {
-        throw new Error('Failed to get API credentials');
-      }
-      const { apiKey } = await response.json();
-
-      // Connect directly to ElevenLabs
-      const ws = new WebSocket(`wss://api.elevenlabs.io/v1/convai/conversation?xi-api-key=${apiKey}`);
+      // Connect to our Edge Function WebSocket endpoint
+      const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+      const ws = new WebSocket(`${protocol}//${window.location.host}/api/ws`);
       wsRef.current = ws;
 
       ws.onopen = () => {
-        addLog('✅ Connected to ElevenLabs');
+        addLog('✅ Connected to WebSocket');
         setStatus('Connected');
 
         // Initialize AudioContext
@@ -43,7 +37,7 @@ export default function WebSocketTest() {
           });
         }
 
-        // Send initial configuration according to ElevenLabs docs
+        // Send initial configuration
         const config = {
           type: "conversation_initiation_client_data",
           conversation_config_override: {
