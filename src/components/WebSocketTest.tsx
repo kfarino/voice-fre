@@ -49,22 +49,23 @@ export default function WebSocketTest() {
 
         // Send initial configuration
         const config = {
-          type: "conversation_initiation_client_data",
-          conversation_config_override: {
-            agent: {
-              prompt: {
-                prompt: "You are a helpful assistant."
-              },
-              first_message: "Hello! How can I help you today?",
-              language: "en"
-            },
-            tts: {
-              voice_id: "21m00Tcm4TlvDq8ikWAM"
-            }
+          session_id: `session_${Date.now()}`,
+          config: {
+            audio_encoding: "LINEAR16",
+            sample_rate: 16000,
+            language: "en"
           }
         };
         ws.send(JSON.stringify(config));
         addLog('📤 Sent initial configuration');
+
+        // Send test message to start conversation
+        const startMessage = {
+          text: "Hello, how are you?",
+          type: "text"
+        };
+        ws.send(JSON.stringify(startMessage));
+        addLog('📤 Sent initial message');
       };
 
       wsRef.current = ws;
@@ -157,13 +158,8 @@ export default function WebSocketTest() {
         int16Data[i] = audioData[i] * 32767;
       }
 
-      // Create the message according to ElevenLabs docs
-      const audioBase64 = btoa(String.fromCharCode(...new Uint8Array(int16Data.buffer)));
-      const message = {
-        user_audio_chunk: audioBase64
-      };
-
-      wsRef.current.send(JSON.stringify(message));
+      // Send the audio data directly as a binary message
+      wsRef.current.send(int16Data.buffer);
       addLog('📤 Sent test audio data');
     } catch (err) {
       addLog(`❌ Error sending audio: ${err instanceof Error ? err.message : 'Unknown error'}`);

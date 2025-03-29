@@ -18,7 +18,8 @@ export default async function handler(req: NextRequest) {
   }
 
   try {
-    const elevenlabsUrl = `wss://api.elevenlabs.io/v1/convai/agents/${agentId}/conversation`
+    // Use the correct WebSocket URL for realtime agents
+    const elevenlabsUrl = `wss://api.elevenlabs.io/v1/conversation-agents/${agentId}/conversation-websocket`
 
     // Forward the WebSocket connection to ElevenLabs
     const response = await fetch(elevenlabsUrl, {
@@ -29,7 +30,8 @@ export default async function handler(req: NextRequest) {
         'Sec-WebSocket-Key': req.headers.get('sec-websocket-key') || '',
         'Sec-WebSocket-Version': req.headers.get('sec-websocket-version') || '',
         'Sec-WebSocket-Protocol': req.headers.get('sec-websocket-protocol') || '',
-        'xi-api-key': apiKey
+        'xi-api-key': apiKey,
+        'User-Agent': 'Vercel Edge Function'
       }
     })
 
