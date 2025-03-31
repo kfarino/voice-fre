@@ -41,17 +41,21 @@ export function CallButton({
       onClick={onCallClick}
       disabled={status === "connecting"}
       className={cn(
-        "relative w-[300px] h-[300px] rounded-full bg-gradient-to-b from-[#F26C3A] to-[#F26C3A]/80 shadow-lg",
+        "relative w-[300px] h-[300px] rounded-full shadow-lg border-0 outline-none",
         "hover:scale-[1.02] active:scale-[0.98] transition-transform",
         "disabled:opacity-50 disabled:cursor-not-allowed",
         "flex flex-col items-center justify-center",
-        "after:absolute after:inset-[-2px] after:rounded-full after:blur-md",
-        "after:bg-[#F26C3A] after:opacity-50 after:z-[-1]",
-        "before:absolute before:inset-[-20px] before:rounded-full",
-        "before:bg-[radial-gradient(circle,rgba(255,138,76,0.3)_0%,rgba(242,108,58,0.2)_40%,transparent_70%)]",
-        "before:mix-blend-screen before:opacity-90 before:z-[-1]",
-        "bg-gradient-to-b from-[#F26C3A] to-[#E85A2C]"
+        "after:absolute after:inset-0 after:rounded-full after:blur-[50px]",
+        "after:bg-[#F26C3A] after:opacity-80 after:z-[-1]",
+        "before:absolute before:inset-[-60px] before:rounded-full",
+        "before:bg-[radial-gradient(circle,rgba(255,138,76,0.7)_0%,rgba(242,108,58,0.4)_40%,transparent_70%)]",
+        "before:mix-blend-screen before:opacity-100 before:z-[-1]",
+        "bg-[#F26C3A]",
+        "shadow-[0_0_60px_20px_rgba(242,108,58,0.3),0_0_100px_60px_rgba(242,108,58,0.2),0_0_150px_80px_rgba(242,108,58,0.1)]"
       )}
+      style={{
+        background: 'linear-gradient(180deg, #F26C3A 0%, #E85A2C 100%)',
+      }}
     >
       {isInitializing ? (
         <div className="flex flex-col items-center">

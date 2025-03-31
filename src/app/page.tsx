@@ -313,25 +313,11 @@ export default function Home() {
       ) : (
         <div className="container mx-auto px-4 h-screen flex flex-col">
           {/* Header */}
-          <div className="pt-6 px-4">
-            <div className="relative text-center mb-12 max-w-[1200px] mx-auto grid grid-cols-[1fr_auto_1fr]">
-              {showHealthConditions && (
-                <button 
-                  onClick={moveBackToAccount}
-                  className="absolute left-4 top-1/2 -translate-y-1/2 w-[48px] h-[48px] rounded-full bg-black border-2 border-white !text-white flex items-center justify-center hover:bg-white/10 transition-colors"
-                  style={{ backgroundColor: 'black' }}
-                  aria-label="Go back"
-                >
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" className="!text-white">
-                    <path d="M19 12H5M12 19l-7-7 7-7" />
-                  </svg>
-                </button>
-              )}
-              <div className="col-start-2 text-center">
-                <h1 className="text-white/60" style={{ fontSize: '40px' }}>
-                  {showHealthConditions ? "Health Conditions" : "Create Your Account"}
-                </h1>
-              </div>
+          <div className="pt-6">
+            <div className="text-center">
+              <h1 className="text-white/60" style={{ fontSize: '40px' }}>
+                {showHealthConditions ? "Health Conditions" : "Create Your Account"}
+              </h1>
             </div>
           </div>
 

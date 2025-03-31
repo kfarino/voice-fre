@@ -50,92 +50,83 @@ export function ConversationCard({
             // Account Creation Screen
             <div className="space-y-6">
               {/* User Data Display */}
-              <div className="flex flex-col gap-[20px] max-w-[800px] mx-auto">
-                <div className="grid grid-cols-[auto_auto_1fr] items-baseline gap-[50px]">
-                  <div>
-                    <span className="text-white/60" style={{ fontSize: '40px' }}>Name</span>
+              <div className="flex flex-col gap-[20px] w-fit">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-baseline">
+                  <div className="text-right whitespace-nowrap">
+                    <span className="text-white/60" style={{ fontSize: '40px' }}>📝 Name</span>
                   </div>
-                  <div>
+                  <div className="w-[50px] flex justify-center">
                     <span className="text-white/60" style={{ fontSize: '40px' }}>:</span>
                   </div>
-                  <div>
+                  <div className="pl-[50px]">
                     {(userData.firstName || userData.lastName) ? (
-                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2" style={{ fontSize: '25px' }}>
+                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2 whitespace-nowrap" style={{ fontSize: '40px' }}>
                         {userData.firstName} {userData.lastName}
                       </span>
-                    ) : <span className="inline-block pb-2" style={{ fontSize: '25px' }}>&nbsp;</span>}
+                    ) : <span className="inline-block pb-2" style={{ fontSize: '40px' }}>&nbsp;</span>}
                   </div>
                 </div>
-                <div className="grid grid-cols-[auto_auto_1fr] items-baseline gap-[50px]">
-                  <div>
-                    <span className="text-white/60" style={{ fontSize: '40px' }}>Role</span>
+                <div className="grid grid-cols-[1fr_auto_1fr] items-baseline">
+                  <div className="text-right whitespace-nowrap">
+                    <span className="text-white/60" style={{ fontSize: '40px' }}>👤 Role</span>
                   </div>
-                  <div>
+                  <div className="w-[50px] flex justify-center">
                     <span className="text-white/60" style={{ fontSize: '40px' }}>:</span>
                   </div>
-                  <div>
+                  <div className="pl-[50px]">
                     {userData.role ? (
-                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2" style={{ fontSize: '25px' }}>
+                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2 whitespace-nowrap" style={{ fontSize: '40px' }}>
                         {userData.role}
                       </span>
-                    ) : <span className="inline-block pb-2" style={{ fontSize: '25px' }}>&nbsp;</span>}
+                    ) : <span className="inline-block pb-2" style={{ fontSize: '40px' }}>&nbsp;</span>}
                   </div>
                 </div>
-                <div className="grid grid-cols-[auto_auto_1fr] items-baseline gap-[50px]">
-                  <div>
-                    <span className="text-white/60" style={{ fontSize: '40px' }}>Date of Birth</span>
+                <div className="grid grid-cols-[1fr_auto_1fr] items-baseline">
+                  <div className="text-right whitespace-nowrap">
+                    <span className="text-white/60" style={{ fontSize: '40px' }}>🎂 Date of Birth</span>
                   </div>
-                  <div>
+                  <div className="w-[50px] flex justify-center">
                     <span className="text-white/60" style={{ fontSize: '40px' }}>:</span>
                   </div>
-                  <div>
+                  <div className="pl-[50px]">
                     {userData.dateOfBirth ? (
-                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2" style={{ fontSize: '25px' }}>
+                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2 whitespace-nowrap" style={{ fontSize: '40px' }}>
                         {userData.dateOfBirth}
                       </span>
-                    ) : <span className="inline-block pb-2" style={{ fontSize: '25px' }}>&nbsp;</span>}
+                    ) : <span className="inline-block pb-2" style={{ fontSize: '40px' }}>&nbsp;</span>}
                   </div>
                 </div>
-                <div className="grid grid-cols-[auto_auto_1fr] items-baseline gap-[50px]">
-                  <div>
-                    <span className="text-white/60" style={{ fontSize: '40px' }}>Phone</span>
+                <div className="grid grid-cols-[1fr_auto_1fr] items-baseline">
+                  <div className="text-right whitespace-nowrap">
+                    <span className="text-white/60" style={{ fontSize: '40px' }}>📞 Phone</span>
                   </div>
-                  <div>
+                  <div className="w-[50px] flex justify-center">
                     <span className="text-white/60" style={{ fontSize: '40px' }}>:</span>
                   </div>
-                  <div>
+                  <div className="pl-[50px]">
                     {userData.phone ? (
-                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2" style={{ fontSize: '25px' }}>
+                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2 whitespace-nowrap" style={{ fontSize: '40px' }}>
                         {formatPhoneNumber(userData.phone)}
                       </span>
-                    ) : <span className="inline-block pb-2" style={{ fontSize: '25px' }}>&nbsp;</span>}
+                    ) : <span className="inline-block pb-2" style={{ fontSize: '40px' }}>&nbsp;</span>}
                   </div>
                 </div>
               </div>
             </div>
           ) : (
-            // Health Conditions Screen
-            <div className="flex flex-col min-h-[400px]">
+            // Health Conditions Screen - Center aligned
+            <div className="flex flex-col items-center mt-20">
               {/* Health Conditions List */}
-              <div className="space-y-6">
+              <div className="flex flex-col gap-[40px] w-fit">
                 {userData.healthConditions && userData.healthConditions.length > 0 && (
                   userData.healthConditions.map((condition) => (
-                    <div key={condition.key}>
-                      <div className="field-value">{condition.name}</div>
+                    <div key={condition.key} className="text-center">
+                      <span className="inline-block border-b-2 border-[#F26C3A] pb-2 whitespace-nowrap text-white" style={{ fontSize: '40px' }}>
+                        {condition.name}
+                      </span>
                     </div>
                   ))
                 )}
-              </div>
-
-              {/* End Conversation Button with fixed spacing */}
-              <div className="flex-1 flex items-center justify-center mt-[500px]">
-                <button
-                  onClick={endCall}
-                  className="w-[320px] h-[80px] bg-[#F26C3A] !text-white font-medium rounded-full hover:bg-[#F26C3A]/90 transition-colors border-0 flex items-center justify-center"
-                  style={{ fontSize: '25px' }}
-                >
-                  I took it
-                </button>
               </div>
             </div>
           )}
