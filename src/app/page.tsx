@@ -6,8 +6,6 @@ import { getAgentSignedUrl } from "./actions/actions";
 import { useConversation } from "@11labs/react";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import { RoleSelector } from "@/components/role-selector";
 import { cn } from "@/lib/utils";
 
 interface ConversationData {
@@ -30,7 +28,6 @@ export default function Home() {
   const [showHealthConditions, setShowHealthConditions] = useState(false);
   const [isConnectButtonFading, setIsConnectButtonFading] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
-  const router = useRouter();
 
   const moveToHealthConditions = useCallback(() => {
     console.log('Moving to health conditions screen');
@@ -97,7 +94,6 @@ export default function Home() {
       toast.error("Conversation not found");
       return;
     }
-    setIsEndingCall(true);
 
     try {
       await conversation?.endSession();
@@ -114,16 +110,7 @@ export default function Home() {
     } catch (error) {
       console.error("Error ending call:", error);
       toast.error("Failed to end conversation");
-    } finally {
-      setIsEndingCall(false);
     }
-  };
-
-  const handleRoleSelect = async (role: "Primary User" | "Caregiver") => {
-    setUserData(prev => ({
-      ...prev,
-      role: role
-    }));
   };
 
   const startCall = async () => {
