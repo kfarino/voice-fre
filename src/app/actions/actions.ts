@@ -7,8 +7,8 @@ import { ElevenLabsClient } from "elevenlabs";
 export const getAgentSignedUrl = actionClient
   .schema(z.object({}))
   .action(async () => {
-    const agentId = process.env.NEXT_PUBLIC_AGENT_ID;
-    const apiKey = process.env.NEXT_PUBLIC_ELEVEN_API_KEY;
+    const agentId = process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID;
+    const apiKey = process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY;
 
     if (!agentId || !apiKey) {
       throw new Error("Environment variables are not set");
