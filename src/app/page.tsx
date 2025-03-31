@@ -23,7 +23,6 @@ export default function Home() {
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [userData, setUserData] = useState<ConversationData>({});
   const [hasAudioAccess, setHasAudioAccess] = useState(false);
-  const [isEndingCall, setIsEndingCall] = useState(false);
   const [showCreateAccount, setShowCreateAccount] = useState(false);
   const [showHealthConditions, setShowHealthConditions] = useState(false);
   const [isConnectButtonFading, setIsConnectButtonFading] = useState(false);
