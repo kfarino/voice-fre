@@ -1,10 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { useConversation } from "@11labs/react";
-import { cn } from "@/lib/utils";
-import { useEffect } from "react";
-import { CallButton } from "@/components/call-button";
 
 interface ConversationData {
   firstName?: string;
@@ -17,37 +13,24 @@ interface ConversationData {
 
 interface ConversationCardProps {
   isOpen: boolean;
-  setIsOpen: (open: boolean) => void;
+  setIsOpen: (isOpen: boolean) => void;
   conversation: ReturnType<typeof useConversation>;
   endCall: () => void;
   userData: ConversationData;
-  startCall: () => Promise<void>;
+  startCall: () => void;
   hasAudioAccess: boolean;
-  requestAudioPermissions: () => Promise<MediaStream | null>;
-  onNext?: () => void;
-  onBack?: () => void;
+  requestAudioPermissions: () => void;
+  onNext: () => void;
+  onBack: () => void;
   showHealthConditions?: boolean;
 }
 
 export function ConversationCard({
-  isOpen,
-  setIsOpen,
   conversation,
   endCall,
   userData,
-  startCall,
-  hasAudioAccess,
-  requestAudioPermissions,
-  onNext,
-  onBack,
   showHealthConditions = false,
 }: ConversationCardProps) {
-  // Helper functions to check field validity
-  const hasValidName = !!(userData?.firstName?.trim() && userData?.lastName?.trim());
-  const hasValidRole = !!userData?.role;
-  const hasValidDOB = !!userData?.dateOfBirth;
-  const hasValidPhone = !!userData?.phone;
-
   // Format phone number for display
   const formatPhoneNumber = (phone: string) => {
     if (!phone) return '';
