@@ -41,7 +41,7 @@ const formatDoseTime = (time: string): string => {
   // Ensure consistent format for single-digit hours (e.g., 8:00AM -> 08:00AM)
   const match = formattedTime.match(/^(\d{1,2}):(\d{2})(AM|PM)$/i);
   if (match) {
-    const [_, hour, minute, period] = match;
+    const [, hour, minute, period] = match;
     formattedTime = `${hour.padStart(2, '0')}:${minute}${period.toUpperCase()}`;
   }
   
