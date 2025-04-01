@@ -292,11 +292,28 @@ export default function Home() {
               showMedications: true
             }));
           },
+          triggerSelectMedication: async (parameters: { number: number }) => {
+            console.log('triggerSelectMedication called with parameters:', parameters);
+            
+            setUserData(prev => {
+              const medications = prev.medications || [];
+              const medicationIndex = parameters.number - 1; // Convert 1-based to 0-based index
+              
+              if (medicationIndex >= 0 && medicationIndex < medications.length) {
+                return {
+                  ...prev,
+                  currentMedicationId: medications[medicationIndex].id
+                };
+              }
+              return prev;
+            });
+          },
           triggerAddMedication: async (parameters: {
             name?: string;
             strength?: string;
             form?: string;
             asNeeded?: number;
+            correctFrom?: string;  // Name of the medication to correct from
           }) => {
             console.log('triggerAddMedication called with parameters:', parameters);
             
@@ -305,6 +322,64 @@ export default function Home() {
               const medications = prev.medications || [];
               
               if (parameters.name) {
+                // Handle medication correction
+                if (parameters.correctFrom) {
+                  const oldMedIndex = medications.findIndex(
+                    m => m.name?.toLowerCase() === parameters.correctFrom?.toLowerCase()
+                  );
+                  
+                  if (oldMedIndex >= 0) {
+                    // Get the old medication's doses
+                    const oldMedication = medications[oldMedIndex];
+                    const oldDoses = oldMedication.doses || [];
+                    
+                    // Create new medication with the old doses
+                    const newMedication = {
+                      id: Math.random().toString(36).substr(2, 9),
+                      name: parameters.name,
+                      strength: parameters.strength || oldMedication.strength,
+                      form: parameters.form || oldMedication.form,
+                      doses: [...oldDoses],  // Transfer all doses
+                      asNeeded: parameters.asNeeded !== undefined ? parameters.asNeeded : oldMedication.asNeeded
+                    };
+                    
+                    // Remove old medication and add new one
+                    const updatedMedications = medications.filter((_, index) => index !== oldMedIndex);
+                    updatedMedications.push(newMedication);
+                    
+                    console.log('Corrected medication:', newMedication);
+                    
+                    return {
+                      ...prev,
+                      medications: updatedMedications,
+                      currentMedicationId: newMedication.id
+                    };
+                  }
+                }
+                
+                // If we have a currentMedicationId, update that medication
+                if (prev.currentMedicationId) {
+                  const currentMedIndex = medications.findIndex(m => m.id === prev.currentMedicationId);
+                  if (currentMedIndex >= 0) {
+                    const updatedMedications = [...medications];
+                    const existingMed = { ...updatedMedications[currentMedIndex] };
+                    
+                    // Update all provided fields
+                    existingMed.name = parameters.name;
+                    if (parameters.strength) existingMed.strength = parameters.strength;
+                    if (parameters.form) existingMed.form = parameters.form;
+                    if (parameters.asNeeded !== undefined) existingMed.asNeeded = parameters.asNeeded;
+                    
+                    updatedMedications[currentMedIndex] = existingMed;
+                    console.log('Updated existing medication by ID:', existingMed);
+                    
+                    return {
+                      ...prev,
+                      medications: updatedMedications
+                    };
+                  }
+                }
+                
                 // Check if we already have a medication with this name
                 const existingMedIndex = medications.findIndex(
                   m => m.name?.toLowerCase() === parameters.name?.toLowerCase()
@@ -329,24 +404,24 @@ export default function Home() {
                     medications: updatedMedications,
                     currentMedicationId: existingMed.id
                   };
-                } else {
-                  // Create new medication
-                  const newMedication = {
-                    id: Math.random().toString(36).substr(2, 9),
-                    name: parameters.name,
-                    strength: parameters.strength,
-                    form: parameters.form,
-                    doses: [],
-                    asNeeded: parameters.asNeeded || 0  // Default to 0 if not specified
-                  };
-                  console.log('Created new medication:', newMedication);
-                  
-                  return {
-                    ...prev,
-                    medications: [...medications, newMedication],
-                    currentMedicationId: newMedication.id
-                  };
                 }
+                
+                // Create new medication
+                const newMedication = {
+                  id: Math.random().toString(36).substr(2, 9),
+                  name: parameters.name,
+                  strength: parameters.strength,
+                  form: parameters.form,
+                  doses: [],
+                  asNeeded: parameters.asNeeded || 0  // Default to 0 if not specified
+                };
+                console.log('Created new medication:', newMedication);
+                
+                return {
+                  ...prev,
+                  medications: [...medications, newMedication],
+                  currentMedicationId: newMedication.id
+                };
               }
               return prev;
             });
@@ -354,7 +429,7 @@ export default function Home() {
           triggerAddDose: async (parameters: {
             name: string;
             pillCount: number;
-            times: string[];
+            times: string | string[];  // Allow both single string and array
             days: string[];
           }) => {
             console.log('triggerAddDose called with parameters:', parameters);
@@ -381,15 +456,36 @@ export default function Home() {
                 medication.doses = [];
               }
 
-              // Add new dose with explicit array creation for specificDays
-              const newDose = {
-                pillCount: parameters.pillCount,
-                timeOfDay: parameters.times[0],
-                specificDays: [...parameters.days] // Create a new array to ensure it's properly set
-              };
-              console.log('Adding new dose:', newDose);
+              // Convert times to array if it's a single string
+              const times = Array.isArray(parameters.times) ? parameters.times : [parameters.times];
 
-              medication.doses = [...(medication.doses || []), newDose];
+              // For each time in the parameters
+              times.forEach(time => {
+                // Check if a dose with this time and days already exists
+                const doses = medication.doses!; // We know doses exists because we initialized it above
+                const existingDoseIndex = doses.findIndex(d => 
+                  d.timeOfDay === time && 
+                  d.specificDays?.length === parameters.days.length &&
+                  d.specificDays?.every(day => parameters.days.includes(day))
+                );
+
+                if (existingDoseIndex !== -1) {
+                  // Update existing dose
+                  doses[existingDoseIndex] = {
+                    pillCount: parameters.pillCount,
+                    timeOfDay: time,
+                    specificDays: [...parameters.days]
+                  };
+                } else {
+                  // Add new dose
+                  doses.push({
+                    pillCount: parameters.pillCount,
+                    timeOfDay: time,
+                    specificDays: [...parameters.days]
+                  });
+                }
+              });
+
               updatedMedications[medicationIndex] = medication;
               console.log('Updated medication:', medication);
 

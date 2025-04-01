@@ -157,37 +157,60 @@ const reconstructDays = (days: string[]): string[] => {
 
 const groupDosesByFrequency = (doses: Dose[]): Record<string, { times: string[], pillCount: number }> => {
   const groups: Record<string, { times: string[], pillCount: number }> = {};
+  const timeToFrequency: Record<string, string> = {}; // Track which frequency group each time belongs to
   
-  doses.forEach(dose => {
-    if (!dose.pillCount || !dose.timeOfDay || !Array.isArray(dose.specificDays)) {
-      return;
-    }
-
+  // Sort doses by most recent first (assuming newer doses are added to the end of the array)
+  const sortedDoses = [...doses].reverse();
+  
+  // First pass: identify the most recent frequency for each time
+  sortedDoses.forEach(dose => {
+    if (!dose.timeOfDay || !Array.isArray(dose.specificDays)) return;
+    
+    const formattedTime = formatDoseTime(dose.timeOfDay);
     const fullDays = reconstructDays(dose.specificDays);
     
     if (fullDays.length === 1 && fullDays[0] === 'As-needed') {
-      const key = 'As-needed';
-      if (!groups[key]) {
-        groups[key] = { times: [], pillCount: dose.pillCount };
-      }
+      timeToFrequency[formattedTime] = 'As-needed';
+    } else {
+      const isEveryday = fullDays.length === 7;
+      const frequency = isEveryday
+        ? "Everyday"
+        : fullDays
+            .map(day => formatDayName(day))
+            .filter(Boolean)
+            .join(", ");
+      
+      timeToFrequency[formattedTime] = frequency;
+    }
+  });
+  
+  // Second pass: group doses by their most recent frequency
+  sortedDoses.forEach(dose => {
+    if (!dose.pillCount || !dose.timeOfDay || !Array.isArray(dose.specificDays)) return;
+    
+    const formattedTime = formatDoseTime(dose.timeOfDay);
+    const currentFrequency = timeToFrequency[formattedTime];
+    
+    if (!currentFrequency) return;
+    
+    if (currentFrequency === 'As-needed') {
+      groups[currentFrequency] = { times: [], pillCount: dose.pillCount };
       return;
     }
-
-    const isEveryday = fullDays.length === 7;
-    const frequency = isEveryday
-      ? "Everyday"
-      : fullDays
-          .map(day => formatDayName(day))
-          .filter(Boolean)
-          .join(", ");
-
-    if (!groups[frequency]) {
-      groups[frequency] = { times: [], pillCount: dose.pillCount };
-    }
-
-    const formattedTime = formatDoseTime(dose.timeOfDay);
-    if (!groups[frequency].times.includes(formattedTime)) {
-      groups[frequency].times.push(formattedTime);
+    
+    // Create or update the frequency group
+    if (!groups[currentFrequency]) {
+      groups[currentFrequency] = {
+        times: [formattedTime],
+        pillCount: dose.pillCount
+      };
+    } else {
+      // Update pill count with most recent value
+      groups[currentFrequency].pillCount = dose.pillCount;
+      // Add time if not already present
+      if (!groups[currentFrequency].times.includes(formattedTime)) {
+        groups[currentFrequency].times.push(formattedTime);
+      }
     }
   });
 
@@ -317,7 +340,7 @@ export function ConversationCard({
                   <div key={medication.id}>
                     <div className="mb-8">
                       <div className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} ${MARGINS.bottom8}`}>
-                        {medication.name} {medication.strength?.replace('milligram', 'mg')} ({medication.form})
+                        {medIndex + 1}. {medication.name} {medication.strength?.replace('milligram', 'mg')} ({medication.form})
                       </div>
                       <div className={PADDING.left200}>
                         {(!medication.doses || medication.doses.length === 0) ? (
@@ -347,7 +370,7 @@ export function ConversationCard({
                     {userData.medications && medIndex === userData.medications.length - 1 && medication.doses && medication.doses.length > 0 && (
                       <div className="flex flex-col w-full">
                         <div className={`${TEXT_STYLES.orange} ${TEXT_STYLES.base} ${MARGINS.top40} ${MARGINS.bottom8}`}>
-                          &lt;Name&gt;
+                          {userData.medications.length + 1}. &lt;Name&gt;
                         </div>
                         <div className={`${TEXT_STYLES.orange} ${TEXT_STYLES.base} ${PADDING.left200}`}>
                           &lt;Frequency&gt; &lt;Times&gt; &lt;Pills/dose&gt;
