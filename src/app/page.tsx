@@ -63,12 +63,6 @@ const arraysEqual = (a: string[], b: string[]): boolean => {
 };
 
 // Types for medication management
-type DoseSchedule = {
-  time: string;
-  days: string[];
-  pillCount: number;
-};
-
 type FlatMedicationUpdate = {
   medicationKey: string;    // Unique identifier (e.g., "metformin_500mg")
   name: string;            // Medication name (e.g., "Metformin")
