@@ -184,7 +184,31 @@ const groupDosesByFrequency = (doses: Dose[]): Record<string, { times: string[],
     if (!groups[frequency]) {
       groups[frequency] = { times: [], pillCount: dose.pillCount };
     }
-    groups[frequency].times.push(formatDoseTime(dose.timeOfDay));
+
+    const formattedTime = formatDoseTime(dose.timeOfDay);
+    if (!groups[frequency].times.includes(formattedTime)) {
+      groups[frequency].times.push(formattedTime);
+    }
+  });
+
+  // Sort times within each frequency group
+  Object.values(groups).forEach(group => {
+    group.times.sort((timeA, timeB) => {
+      const getTimeValue = (time: string) => {
+        const isPM = time.endsWith('PM');
+        const [hourStr, minuteStr] = time.replace(/(AM|PM)$/, '').split(':');
+        let hour = parseInt(hourStr);
+        const minute = parseInt(minuteStr || '0');
+        
+        // Adjust hour for PM and handle 12 AM/PM cases
+        if (isPM && hour !== 12) hour += 12;
+        if (!isPM && hour === 12) hour = 0;
+        
+        return hour * 60 + minute;
+      };
+      
+      return getTimeValue(timeA) - getTimeValue(timeB);
+    });
   });
 
   return groups;
