@@ -69,15 +69,6 @@ type DoseSchedule = {
   pillCount: number;
 };
 
-type MedicationUpdate = {
-  name: string;
-  medicationKey: string;
-  strength: string;
-  form: string;
-  doses: DoseSchedule[];
-  asNeeded?: number;
-};
-
 type FlatMedicationUpdate = {
   medicationKey: string;    // Unique identifier (e.g., "metformin_500mg")
   name: string;            // Medication name (e.g., "Metformin")
