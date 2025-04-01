@@ -15,6 +15,20 @@ interface ConversationData {
   dateOfBirth?: string;
   phone?: string;
   healthConditions?: { key: string; name: string }[];
+  medications?: Array<{
+    id: string;
+    name?: string;
+    strength?: string;
+    form?: string;
+    doses?: Array<{
+      pillCount?: number;
+      timeOfDay?: string;
+      specificDays?: string[];
+    }>;
+    asNeeded: number;  // 0 if not as needed, otherwise max pills per day
+  }>;
+  showMedications?: boolean;
+  currentMedicationId?: string;
 }
 
 export default function Home() {
@@ -40,15 +54,13 @@ export default function Home() {
     setShowCreateAccount(true);
   }, [setShowCreateAccount, setShowHealthConditions]);
 
-  // Monitor userData changes
+  // Monitor connection status
   useEffect(() => {
-    console.log('userData updated:', userData);
-    
-    // Show create account screen immediately after connecting
-    if (!showCreateAccount && !showHealthConditions && conversation.status === "connected") {
+    // Show create account screen only after connecting
+    if (conversation.status === "connected" && !showCreateAccount && !showHealthConditions) {
       setShowCreateAccount(true);
     }
-  }, [userData, showCreateAccount, showHealthConditions, conversation.status]);
+  }, [conversation.status, showCreateAccount, showHealthConditions]);
 
   // Audio stream handling
   const requestAudioPermissions = async () => {
@@ -167,7 +179,7 @@ export default function Home() {
             setUserData(prev => {
               const newData = {
                 ...prev,
-                lastName: parameters.lastName.trim(),
+                lastName: parameters.lastName.trim()
               };
               console.log('Updating userData with lastName:', newData);
               return newData;
@@ -272,6 +284,147 @@ export default function Home() {
               return newData;
             });
           },
+          triggerShowMedications: async () => {
+            console.log('Moving to medications screen');
+            setShowHealthConditions(false);
+            setUserData(prev => ({
+              ...prev,
+              showMedications: true
+            }));
+          },
+          triggerAddMedication: async (parameters: {
+            name?: string;
+            strength?: string;
+            form?: string;
+            asNeeded?: number;
+          }) => {
+            console.log('triggerAddMedication called with parameters:', parameters);
+            
+            setUserData(prev => {
+              console.log('Previous userData:', prev);
+              const medications = prev.medications || [];
+              
+              if (parameters.name) {
+                // Check if we already have a medication with this name
+                const existingMedIndex = medications.findIndex(
+                  m => m.name?.toLowerCase() === parameters.name?.toLowerCase()
+                );
+                console.log('Existing medication index:', existingMedIndex);
+                
+                if (existingMedIndex >= 0) {
+                  // Update existing medication
+                  const updatedMedications = [...medications];
+                  const existingMed = { ...updatedMedications[existingMedIndex] };
+                  
+                  // Update the fields that are provided
+                  if (parameters.strength) existingMed.strength = parameters.strength;
+                  if (parameters.form) existingMed.form = parameters.form;
+                  if (parameters.asNeeded !== undefined) existingMed.asNeeded = parameters.asNeeded;
+                  
+                  updatedMedications[existingMedIndex] = existingMed;
+                  console.log('Updated existing medication:', existingMed);
+                  
+                  return {
+                    ...prev,
+                    medications: updatedMedications,
+                    currentMedicationId: existingMed.id
+                  };
+                } else {
+                  // Create new medication
+                  const newMedication = {
+                    id: Math.random().toString(36).substr(2, 9),
+                    name: parameters.name,
+                    strength: parameters.strength,
+                    form: parameters.form,
+                    doses: [],
+                    asNeeded: parameters.asNeeded || 0  // Default to 0 if not specified
+                  };
+                  console.log('Created new medication:', newMedication);
+                  
+                  return {
+                    ...prev,
+                    medications: [...medications, newMedication],
+                    currentMedicationId: newMedication.id
+                  };
+                }
+              }
+              return prev;
+            });
+          },
+          triggerAddDose: async (parameters: {
+            name: string;
+            pillCount: number;
+            times: string[];
+            days: string[];
+          }) => {
+            console.log('triggerAddDose called with parameters:', parameters);
+            
+            setUserData((prevData: ConversationData) => {
+              console.log('Previous userData in addDose:', prevData);
+              const medications = prevData.medications || [];
+              const medicationIndex = medications.findIndex(
+                m => m.name?.toLowerCase() === parameters.name.toLowerCase()
+              );
+              console.log('Found medication index:', medicationIndex);
+
+              if (medicationIndex === -1) {
+                console.warn('Medication not found:', parameters.name);
+                return prevData;
+              }
+
+              const updatedMedications = [...medications];
+              const medication = { ...updatedMedications[medicationIndex] };
+              console.log('Current medication before update:', medication);
+              
+              // Initialize doses array if it doesn't exist
+              if (!medication.doses) {
+                medication.doses = [];
+              }
+
+              // Add new dose with explicit array creation for specificDays
+              const newDose = {
+                pillCount: parameters.pillCount,
+                timeOfDay: parameters.times[0],
+                specificDays: [...parameters.days] // Create a new array to ensure it's properly set
+              };
+              console.log('Adding new dose:', newDose);
+
+              medication.doses = [...(medication.doses || []), newDose];
+              updatedMedications[medicationIndex] = medication;
+              console.log('Updated medication:', medication);
+
+              return {
+                ...prevData,
+                medications: updatedMedications
+              };
+            });
+          },
+          triggerAsNeeded: async (parameters: {
+            name: string;
+            asNeeded: number;
+          }) => {
+            console.log('Setting medication as-needed status:', parameters);
+            
+            setUserData(prev => {
+              const medications = prev.medications || [];
+              const medicationIndex = medications.findIndex(
+                m => m.name?.toLowerCase() === parameters.name?.toLowerCase()
+              );
+              
+              if (medicationIndex === -1) return prev;
+              
+              const updatedMedications = [...medications];
+              updatedMedications[medicationIndex] = {
+                ...updatedMedications[medicationIndex],
+                asNeeded: parameters.asNeeded
+              };
+              
+              return {
+                ...prev,
+                medications: updatedMedications
+              };
+            });
+          },
         },
       });
     } catch (error) {
@@ -312,30 +465,24 @@ export default function Home() {
         </div>
       ) : (
         <div className="container mx-auto px-4 h-screen flex flex-col">
-          {/* Header */}
-          <div className="pt-6">
-            <div className="text-center">
-              <h1 className="text-white/60" style={{ fontSize: '40px' }}>
-                {showHealthConditions ? "Health Conditions" : "Create Your Account"}
-              </h1>
+          {/* Header and Content Container */}
+          <div className="flex flex-col items-center w-full max-w-3xl mx-auto">
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col w-full">
+              <ConversationCard
+                isOpen={isCollecting}
+                setIsOpen={setIsCollecting}
+                conversation={conversation}
+                endCall={endCall}
+                userData={userData}
+                startCall={startCall}
+                hasAudioAccess={hasAudioAccess}
+                requestAudioPermissions={requestAudioPermissions}
+                onNext={moveToHealthConditions}
+                onBack={moveBackToAccount}
+                showHealthConditions={showHealthConditions}
+              />
             </div>
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1 flex flex-col">
-            <ConversationCard
-              isOpen={isCollecting}
-              setIsOpen={setIsCollecting}
-              conversation={conversation}
-              endCall={endCall}
-              userData={userData}
-              startCall={startCall}
-              hasAudioAccess={hasAudioAccess}
-              requestAudioPermissions={requestAudioPermissions}
-              onNext={moveToHealthConditions}
-              onBack={moveBackToAccount}
-              showHealthConditions={showHealthConditions}
-            />
           </div>
         </div>
       )}
