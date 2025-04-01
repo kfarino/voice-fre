@@ -38,11 +38,11 @@ const formatDoseTime = (time: string): string => {
   // Remove all spaces and convert to uppercase
   let formattedTime = time.replace(/\s+/g, '').toUpperCase();
   
-  // Ensure consistent format for single-digit hours (e.g., 8:00AM -> 08:00AM)
+  // Ensure consistent format for single-digit hours (e.g., 8:00AM -> 8:00AM)
   const match = formattedTime.match(/^(\d{1,2}):(\d{2})(AM|PM)$/i);
   if (match) {
     const [, hour, minute, period] = match;
-    formattedTime = `${hour.padStart(2, '0')}:${minute}${period.toUpperCase()}`;
+    formattedTime = `${hour}:${minute}${period.toUpperCase()}`;
   }
   
   return formattedTime;

@@ -241,12 +241,44 @@ const formatMedicationStrength = (strength: string | undefined): string => {
     .replace(/milliliter/i, 'ml');
 };
 
+const BouncingPills = () => {
+  return (
+    <div className="flex justify-center items-center gap-[60px] mt-8">
+      {[...Array(5)].map((_, i) => (
+        <span
+          key={i}
+          className="inline-block"
+          style={{
+            animation: 'bounce 1s infinite',
+            animationDelay: `${i * 0.2}s`,
+            display: 'inline-block',
+            fontSize: '40px'
+          }}
+        >
+          💊
+        </span>
+      ))}
+      <style jsx>{`
+        @keyframes bounce {
+          0%, 100% {
+            transform: translateY(0);
+            animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+          }
+          50% {
+            transform: translateY(-25px);
+            animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+          }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 export function ConversationCard({
   conversation,
   userData,
   showHealthConditions = false,
 }: ConversationCardProps) {
-
   // Memoize expensive computations
   const formattedName = useMemo(() => 
     `${formatName(userData.firstName)} ${formatName(userData.lastName)}`.trim(),
@@ -279,40 +311,33 @@ export function ConversationCard({
                   <span className="text-white text-[48px] font-normal">Create Your Account</span>
                 </div>
                 
-                <div className="flex flex-col gap-[20px] w-full items-center">
+                <div className="flex flex-col gap-[40px] items-center">
                   <div className="flex flex-col gap-[40px] items-center">
                     <div className="flex items-center">
-                      <span className="text-white/60 text-[40px]">📝 Name</span>
-                      <span className="text-white/60 text-[40px] pr-[15px]">:</span>
                       <span className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} border-b-2 border-[#F26C3A]`}>
                         {formattedName || '\u00A0'}
                       </span>
                     </div>
 
                     <div className="flex items-center">
-                      <span className="text-white/60 text-[40px]">👤 Role</span>
-                      <span className="text-white/60 text-[40px] pr-[15px]">:</span>
                       <span className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} border-b-2 border-[#F26C3A]`}>
                         {userData.role || '\u00A0'}
                       </span>
                     </div>
 
                     <div className="flex items-center">
-                      <span className="text-white/60 text-[40px]">🎂 Date of Birth</span>
-                      <span className="text-white/60 text-[40px] pr-[15px]">:</span>
                       <span className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} border-b-2 border-[#F26C3A]`}>
                         {userData.dateOfBirth || '\u00A0'}
                       </span>
                     </div>
 
                     <div className="flex items-center">
-                      <span className="text-white/60 text-[40px]">📞 Phone</span>
-                      <span className="text-white/60 text-[40px] pr-[15px]">:</span>
                       <span className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} border-b-2 border-[#F26C3A]`}>
                         {formattedPhone}
                       </span>
                     </div>
                   </div>
+                  <BouncingPills />
                 </div>
               </div>
             </div>
@@ -337,7 +362,7 @@ export function ConversationCard({
           
           {userData.showMedications && (
             <div className="flex flex-col w-full">
-              <div className={`text-center ${MARGINS.bottom60}`}>
+              <div className="text-center mb-[60px]">
                 <span className="text-white text-[48px] font-normal">Medication Details</span>
               </div>
               <div className="flex flex-col gap-[60px] w-full pl-[200px]">
@@ -403,4 +428,4 @@ export function ConversationCard({
       )}
     </div>
   );
-} 
+}
