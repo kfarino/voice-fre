@@ -116,14 +116,6 @@ const formatName = (name: string | undefined): string => {
   ).join(' ');
 };
 
-const formatMedicationName = (name: string | undefined): string => {
-  if (!name) return '';
-  return name.split(' ').map(word => {
-    if (/\d/.test(word)) return word;
-    return word.charAt(0).toUpperCase() + word.slice(1).toLowerCase();
-  }).join(' ');
-};
-
 const DAY_MAP: Record<string, string> = {
   'Monday': 'Mon',
   'Tuesday': 'Tues',
@@ -200,7 +192,6 @@ const groupDosesByFrequency = (doses: Dose[]): Record<string, { times: string[],
 
 export function ConversationCard({
   conversation,
-  endCall,
   userData,
   showHealthConditions = false,
 }: ConversationCardProps) {
