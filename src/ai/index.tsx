@@ -1,20 +1,16 @@
 "use client";
 
-import React from "react";
-
 import { useConversation } from "@11labs/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
-import Header from "./Header";
 import {
 	ConversationData,
 	useConversationData,
 	useSetConversationData,
 } from "@/context/ConversationData";
-import Ai from "@/ai";
 
-export default function Home() {
+const Ai = () => {
 	const conversation = useConversation();
 	const [isCollecting, setIsCollecting] = useState(false);
 	const [conversationId, setConversationId] = useState<string | null>(null);
@@ -23,9 +19,6 @@ export default function Home() {
 	const [showHealthConditions, setShowHealthConditions] = useState(false);
 	const [isConnectButtonFading, setIsConnectButtonFading] = useState(false);
 	const streamRef = useRef<MediaStream | null>(null);
-	const [userData, setUserData] = useState<ConversationData>();
-
-	const conversationData = useConversationData();
 	const setConversationData = useSetConversationData();
 
 	const moveToHealthConditions = useCallback(() => {
@@ -119,7 +112,7 @@ export default function Home() {
 			setConversationId(null);
 			setShowCreateAccount(false);
 			setShowHealthConditions(false);
-			setUserData({});
+			setConversationData({});
 		} catch (error) {
 			console.error("Error ending call:", error);
 			toast.error("Failed to end conversation");
@@ -143,25 +136,30 @@ export default function Home() {
 			) => {
 				console.log("UserAccountInfo called with parameters:", parameters);
 
-				setUserData((prev) => {
+				if (!parameters) {
+					console.error("No parameters received");
+					return;
+				}
+
+				setConversationData((prev) => {
 					const newData = {
 						...prev,
 						userDetails: {
-							...(parameters?.first_name && {
+							...(parameters.first_name && {
 								first_name: parameters.first_name.trim(),
 							}),
-							...(parameters?.last_name && {
+							...(parameters.last_name && {
 								last_name: parameters.last_name.trim(),
 							}),
-							...(parameters?.role && { role: parameters.role }),
-							// ...(parameters?.date_of_birth && {
-							// 	date_of_birth: parameters.date_of_birth,
-							// }),
-							...(parameters?.phone_number && {
+							...(parameters.role && { role: parameters.role }),
+							...("date_of_birth" in parameters && {
+								date_of_birth: parameters.date_of_birth,
+							}),
+							...(parameters.phone_number && {
 								phone_number: parameters.phone_number.replace(/\D/g, ""),
 							}),
 
-							isConfirmed: parameters?.step_completed,
+							isConfirmed: parameters.step_completed,
 						},
 					};
 
@@ -222,15 +220,51 @@ export default function Home() {
 	};
 
 	return (
-		<main className="min-h-screen bg-black text-white">
-			<div className="min-h-screen bg-charcoal flex items-center justify-center p-4">
-				<div className="w-[1024px] h-[600px] border-2 border-white/30 overflow-hidden relative">
-					<div className="w-full h-full flex flex-col overflow-hidden">
-						<Header title="Welcome" />
-						<Ai />
+		<button
+			onClick={startCall}
+			className="w-72 h-72 rounded-full bg-highlight text-white flex flex-col items-center justify-center shadow-[0_8px_30px_rgba(242,108,58,0.6)] hover:bg-highlight/90 hover:shadow-[0_8px_35px_rgba(242,108,58,0.7)] transition-all duration-300 focus:outline-none focus:ring-4 focus:ring-highlight/50 transform hover:scale-[1.02] active:scale-[0.98]"
+		>
+			<div className="text-center -mt-2">
+				<p className="text-[25px] font-light ">
+					{conversation.status === "disconnected"
+						? "Tap to connect"
+						: conversation.status === "connecting"
+						? "Connecting..."
+						: conversation.isSpeaking
+						? "Ai talking..."
+						: "Ai listening..."}
+				</p>
+			</div>
+
+			<div className="relative mt-3">
+				<div className="w-24 h-24 rounded-full bg-white/20 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+
+				<div className="w-20 h-20 rounded-full bg-white/30 animate-blob absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+					<div
+						className={`w-full h-full rounded-full flex items-center justify-center ${
+							conversation.isSpeaking
+								? "animate-wave"
+								: conversation.status === "connected"
+								? "animate-pulse"
+								: ""
+						}`}
+					>
+						<svg
+							viewBox="0 0 200 200"
+							className="w-16 h-16 fill-white"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<path
+								d="M45.9,-52.2C59.7,-42.1,71.3,-28.8,74.9,-13.5C78.4,1.8,74,19,64.2,31.1C54.4,43.2,39.2,50.2,23.6,56.1C8,62,-7.9,66.9,-23.8,64.2C-39.7,61.6,-55.7,51.3,-66.8,35.9C-77.9,20.5,-84.3,0,-79.1,-16C-74,-31.9,-57.4,-43.5,-41.4,-53C-25.4,-62.5,-9.9,-70,5.1,-76C20.2,-81.9,40.4,-86.5,51,-75.4C61.5,-64.4,62.3,-37.7,45.9,-52.2Z"
+								transform="translate(100 100)"
+								className={`${conversation.isSpeaking ? "animate-morph" : ""}`}
+							/>
+						</svg>
 					</div>
 				</div>
 			</div>
-		</main>
+		</button>
 	);
-}
+};
+
+export default Ai;
