@@ -1,0 +1,163 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+	:root {
+		--background: 0 0% 100%;
+		--foreground: 222.2 84% 4.9%;
+
+		--card: 0 0% 100%;
+		--card-foreground: 222.2 84% 4.9%;
+
+		--popover: 0 0% 100%;
+		--popover-foreground: 222.2 84% 4.9%;
+
+		--primary: 16 87% 59%;
+		--primary-foreground: 0 0% 100%;
+
+		--secondary: 240 4.8% 95.9%;
+		--secondary-foreground: 240 5.9% 10%;
+
+		--muted: 240 4.8% 95.9%;
+		--muted-foreground: 240 3.8% 46.1%;
+
+		--accent: 240 4.8% 95.9%;
+		--accent-foreground: 240 5.9% 10%;
+
+		--destructive: 0 84.2% 60.2%;
+		--destructive-foreground: 0 0% 98%;
+
+		--border: 16 87% 59% / 30%;
+		--input: 16 87% 59% / 30%;
+		--ring: 16 87% 59%;
+
+		--radius: 0.5rem;
+	}
+}
+
+@layer base {
+	* {
+		@apply border-border;
+	}
+
+	body {
+		@apply bg-charcoal text-white antialiased;
+		font-feature-settings: "rlig" 1, "calt" 1;
+	}
+}
+
+@layer components {
+	.onboarding-container {
+		@apply flex flex-col items-center justify-between p-6 overflow-hidden w-full h-full;
+	}
+
+	.onboarding-content {
+		@apply w-full max-h-full flex-1 overflow-y-auto py-2;
+	}
+
+	.onboarding-header {
+		@apply w-full mb-4 flex items-center justify-between;
+	}
+
+	.onboarding-footer {
+		@apply w-full mt-4 flex items-center justify-between;
+	}
+
+	.onboarding-title {
+		@apply text-3xl font-bold text-white;
+	}
+
+	.onboarding-subtitle {
+		@apply text-xl text-white/70;
+	}
+
+	.form-group {
+		@apply mb-6;
+	}
+
+	.input-label {
+		@apply block text-lg font-medium text-white/80 mb-2;
+	}
+
+	.medication-card {
+		@apply p-5 rounded-lg border border-white/10 bg-white/5 mb-5;
+	}
+
+	.medication-dose {
+		@apply ml-4 p-4 rounded-md border border-white/10 bg-white/5 my-3;
+	}
+
+	.pill-badge {
+		@apply inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-highlight text-white mr-2 mb-2;
+	}
+
+	.progress-indicator {
+		@apply flex items-center justify-center gap-3 my-5;
+	}
+
+	.progress-dot {
+		@apply w-3 h-3 rounded-full bg-white/30;
+	}
+
+	.progress-dot-active {
+		@apply w-3 h-3 rounded-full bg-highlight;
+	}
+
+	/* Header styling based on design system */
+	.header-bar {
+		@apply flex items-center justify-center w-full h-16 bg-charcoal relative;
+	}
+
+	.header-title {
+		@apply text-white text-xl font-medium text-center;
+	}
+
+	.header-button {
+		@apply absolute left-4 flex items-center justify-center w-12 h-12 rounded-full bg-white/10;
+	}
+
+	/* Voice-based UI classes */
+	.voice-display-card {
+		@apply flex items-start gap-4 p-5 rounded-lg border border-white/10 bg-white/5 mb-5;
+	}
+
+	.voice-listening-indicator {
+		@apply flex justify-center;
+	}
+
+	.voice-instruction {
+		@apply text-lg text-white/70 mb-5;
+	}
+
+	/* List item styling based on design system */
+	.list-item {
+		@apply w-full p-5 border border-white/10 bg-white/5 rounded-lg mb-4;
+	}
+
+	/* Button styling based on design system */
+	.primary-button {
+		@apply bg-highlight text-white rounded-full py-4 px-8 w-full flex items-center justify-center hover:bg-highlight/90 transition-colors text-lg;
+	}
+
+	/* Pulse animation for microphone */
+	.pulse-animation {
+		@apply relative animate-pulse;
+	}
+}
+
+/* Remove browser outline on focus for buttons that match our design system */
+button:focus {
+	outline: none;
+}
+
+/* Custom spacing utility classes */
+.px-10 {
+	padding-left: 40px;
+	padding-right: 40px;
+}
+
+.py-10 {
+	padding-top: 40px;
+	padding-bottom: 40px;
+}

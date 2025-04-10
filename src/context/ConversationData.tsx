@@ -27,7 +27,7 @@ type CaregiverDetails = SharedUserDetails & {
 
 type UserDetails = PrimaryUserDetails | CaregiverDetails;
 
-type HealthConditions = { conditions: Array<string>; step_completed: boolean };
+type HealthConditions = { conditions: Array<string>; stepCompleted: boolean };
 
 type Medications = {
 	medications: Array<{
