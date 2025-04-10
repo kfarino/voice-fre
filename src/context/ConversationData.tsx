@@ -1,20 +1,22 @@
 "use client";
 
 import React from "react";
+import mockData from "./mockData";
 
 type SharedUserDetails = {
 	firstName: string;
 	lastName: string;
 	phoneNumber: string;
-	role: "Primary User" | "Caregiver";
 	stepCompleted: boolean; // at the end of the conversation user must confirm their details
 };
 
 type PrimaryUserDetails = SharedUserDetails & {
+	role: "Primary User";
 	dateOfBirth: string; // Format: "January 11, 1990"
 };
 
 type CaregiverDetails = SharedUserDetails & {
+	role: "Caregiver";
 	relationshipToLovedOne: string;
 	lovedOne: {
 		lovedOneFirstName: string;
@@ -27,7 +29,7 @@ type CaregiverDetails = SharedUserDetails & {
 
 type UserDetails = PrimaryUserDetails | CaregiverDetails;
 
-type HealthConditions = { conditions: Array<string>; step_completed: boolean };
+type HealthConditions = { conditions: Array<string>; stepCompleted: boolean };
 
 type Medications = {
 	medications: Array<{
@@ -45,6 +47,7 @@ type Medications = {
 };
 
 export type ConversationData = {
+	mockData?: boolean;
 	userDetails?: Partial<UserDetails>;
 	healthConditions?: HealthConditions;
 	medications?: Medications;
@@ -59,6 +62,7 @@ const ConversationDataProvider: React.FC<{ children?: React.ReactNode }> = ({
 	children,
 }) => {
 	const [state, dispatch] = React.useState<ConversationData>({});
+	// const [state, dispatch] = React.useState<ConversationData>(mockData);
 
 	return (
 		<SetConversationDataCtx.Provider value={dispatch}>
