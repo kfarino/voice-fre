@@ -103,21 +103,7 @@ const Ai = () => {
 					const newData = {
 						...prev,
 						userDetails: {
-							...(parameters.firstName && {
-								firstName: parameters.firstName.trim(),
-							}),
-							...(parameters.lastName && {
-								lastName: parameters.lastName.trim(),
-							}),
-							...(parameters.role && { role: parameters.role }),
-							...("dateOfBirth" in parameters && {
-								dateOfBirth: parameters.dateOfBirth,
-							}),
-							...(parameters.phoneNumber && {
-								phoneNumber: parameters.phoneNumber.replace(/\D/g, ""),
-							}),
-
-							isConfirmed: parameters.stepCompleted,
+							...parameters,
 						},
 					};
 
@@ -155,11 +141,35 @@ const Ai = () => {
 				setAppState({ step: "healthConditions" });
 			};
 
+			const handleMedications = async (
+				parameters: ConversationData["medications"]
+			) => {
+				console.log("handleMedications:", parameters);
+
+				if (!parameters) {
+					console.error("No parameters received");
+					return;
+				}
+
+				setConversationData((prev) => ({
+					...prev,
+					medications: {
+						...(parameters.medications && {
+							medications: parameters.medications,
+						}),
+						stepCompleted: parameters.stepCompleted,
+					},
+				}));
+
+				setAppState({ step: "medications" });
+			};
+
 			const sessionConfig = {
 				agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID,
 				clientTools: {
 					UserAccountInfo: handleUserDetails,
 					HealthConditions: handleHealthConditions,
+					Medications: handleMedications,
 				},
 				onConnect: ({ conversationId }: { conversationId: string }) => {
 					console.log("Connected to agent:", conversationId);

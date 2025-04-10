@@ -46,10 +46,10 @@
 }
 
 .pulseConnected {
+	pointer-events: none;
 	transition: all 1s ease-in-out;
 	width: 200%;
-	height: 200%;
-	/* transform: translateX(0%) translateY(0%); */
+	height: 350%;
 	color: transparent;
 
 	&:before {
