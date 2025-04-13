@@ -3,12 +3,13 @@
 import React from "react";
 
 type Props = {
-	step: "init" | "userDetails" | "healthConditions" | "medications";
+	isConnected: boolean;
 };
 
 const initState: Props = {
-	step: "init",
+	isConnected: false,
 };
+
 const AppStateCtx = React.createContext<Props>(initState);
 const SetAppStateCtx = React.createContext<
 	React.Dispatch<React.SetStateAction<Props>>

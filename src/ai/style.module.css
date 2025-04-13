@@ -1,3 +1,12 @@
+/* Hide debug text */
+.root :global([id="DEBUG"]) {
+	display: none !important;
+}
+
+.root {
+	width: 100%;
+}
+
 .pulse {
 	position: absolute;
 	z-index: 0;
@@ -20,11 +29,6 @@
 		width: 100%;
 		height: 100%;
 		background-color: rgb(242 108 58);
-		/* background-image: radial-gradient(
-			circle,
-			rgb(255, 69, 2) 0%,
-			rgb(242, 108, 58) 50%
-		); */
 		border-radius: 50%;
 		animation: beat-center 2s ease 0s infinite;
 	}
@@ -46,10 +50,9 @@
 }
 
 .pulseConnected {
-	pointer-events: none;
 	transition: all 1s ease-in-out;
 	width: 200%;
-	height: 350%;
+	height: 200%;
 	color: transparent;
 
 	&:before {
@@ -100,54 +103,118 @@
 	}
 }
 
-.bars {
+.promptsContainer {
 	position: absolute;
 	left: 50%;
-	bottom: 15px;
-	height: 5px;
-	transform: translate(-50%, 0%);
+	top: 45%;
+	transform: translate(-50%, -50%);
+	width: 90%;
+	max-width: 800px;
+	z-index: 10;
+	opacity: 0;
+	animation: fadeIn 0.5s ease-out forwards;
+}
+
+.promptsTitle {
+	text-align: center;
+	font-size: 32px;
+	font-weight: 500;
+	color: #fff;
+	margin-bottom: 40px;
+}
+
+.promptsList {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 0 20px;
+}
+
+.promptButton {
+	display: flex;
+	align-items: center;
+	gap: 16px;
+	padding: 24px;
+	background: rgba(242, 108, 58, 0.1);
+	border: 1px solid rgba(242, 108, 58, 0.2);
+	border-radius: 16px;
+	border-radius: 12px;
+	color: #fff;
+	text-align: left;
+	font-size: 16px;
+	transition: all 0.2s ease;
+}
+
+.promptButton:hover {
+	background: rgba(242, 108, 58, 0.2);
+	border-color: rgba(242, 108, 58, 0.3);
+}
+
+.promptIcon {
+	width: 20px;
+	height: 20px;
+	color: rgb(242, 108, 58);
+	opacity: 0.8;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+		transform: translate(-50%, -45%);
+	}
+	to {
+		opacity: 1;
+		transform: translate(-50%, -50%);
+	}
+}
+
+.bars {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	transition: all 0.3s ease;
-}
-
-.speaking {
-	bottom: 5px;
-	height: 30px;
+	gap: 2px;
+	height: 24px;
 }
 
 .bars > div {
 	background: rgb(242, 108, 58);
 	height: 100%;
-	width: 7px;
-	margin: 0px 2px;
-	border-radius: 5px;
-	animation: sound 0ms -0.6s linear infinite alternate;
+	width: 4px;
+	margin: 0px 1px;
+	border-radius: 2px;
+	animation: none;
 }
 
-.bars > div:nth-child(2) {
+.speaking {
+	height: 24px;
+}
+
+.speaking > div {
+	animation: sound 0ms -600ms linear infinite alternate;
+}
+
+.speaking > div:nth-child(2) {
 	animation-duration: 474ms;
 }
-.bars > div:nth-child(2n + 1) {
+.speaking > div:nth-child(2n + 1) {
 	animation-duration: 433ms;
 }
-.bars > div:nth-child(3n + 1) {
+.speaking > div:nth-child(3n + 1) {
 	animation-duration: 407ms;
 }
-.bars > div:nth-child(4n + 1) {
+.speaking > div:nth-child(4n + 1) {
 	animation-duration: 458ms;
 }
-.bars > div:nth-child(5n + 1) {
+.speaking > div:nth-child(5n + 1) {
 	animation-duration: 400ms;
 }
-.bars > div:nth-child(6n + 1) {
+.speaking > div:nth-child(6n + 1) {
 	animation-duration: 427ms;
 }
-.bars > div:nth-child(7n + 1) {
+.speaking > div:nth-child(7n + 1) {
 	animation-duration: 441ms;
 }
-.bars > div:nth-child(8n + 1) {
+.speaking > div:nth-child(8n + 1) {
 	animation-duration: 419ms;
 }
 

@@ -3,21 +3,24 @@
 import { useConversation } from "@11labs/react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
-
-import { useSetAppState } from "@/context/AppState";
-import {
-	ConversationData,
-	useSetConversationData,
-} from "@/context/ConversationData";
 import Style from "./style.module.css";
+import HealthDashboard from '@/components/HealthDashboard';
+import Header from '@/components/Header';
 
 const Ai = () => {
-	const setAppState = useSetAppState();
 	const conversation = useConversation();
 	const [conversationId, setConversationId] = useState<string | null>(null);
 	const [hasAudioAccess, setHasAudioAccess] = useState(false);
+	const [isSpeaking, setIsSpeaking] = useState(false);
 	const streamRef = useRef<MediaStream | null>(null);
-	const setConversationData = useSetConversationData();
+
+	useEffect(() => {
+		// Check if API key is available
+		if (!process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY) {
+			console.error("ElevenLabs API key is not configured");
+			toast.error("ElevenLabs API key is missing");
+		}
+	}, []);
 
 	// Audio stream handling
 	const requestAudioPermissions = async () => {
@@ -71,9 +74,7 @@ const Ai = () => {
 				streamRef.current.getTracks().forEach((track) => track.stop());
 				streamRef.current = null;
 			}
-			// Reset all states to initial values
 			setConversationId(null);
-			setConversationData({});
 		} catch (error) {
 			console.error("Error ending call:", error);
 			toast.error("Failed to end conversation");
@@ -84,159 +85,66 @@ const Ai = () => {
 		try {
 			if (!hasAudioAccess) {
 				const stream = await requestAudioPermissions();
-				if (!stream) {
-					return;
-				}
+				if (!stream) return;
 			}
 
-			const handleUserDetails = async (
-				parameters: ConversationData["userDetails"]
-			) => {
-				console.log("handleUserDetails:", parameters);
-
-				if (!parameters) {
-					console.error("No parameters received");
-					return;
-				}
-
-				setConversationData((prev) => {
-					const newData = {
-						...prev,
-						userDetails: {
-							...parameters,
-						},
-					};
-
-					// If all required fields are filled and isConfirmed is true, move to health conditions
-					if (parameters?.stepCompleted) {
-						setAppState({
-							step: "healthConditions",
-						});
-					}
-
-					return newData;
-				});
-			};
-
-			const handleHealthConditions = async (
-				parameters: ConversationData["healthConditions"]
-			) => {
-				console.log("handleHealthConditions:", parameters);
-
-				if (!parameters) {
-					console.error("No parameters received");
-					return;
-				}
-
-				setConversationData((prev) => ({
-					...prev,
-					healthConditions: {
-						...(parameters.conditions && {
-							conditions: parameters.conditions,
-						}),
-						stepCompleted: parameters.stepCompleted,
-					},
-				}));
-
-				setAppState({ step: "healthConditions" });
-			};
-
-			const handleMedications = async (
-				parameters: ConversationData["medications"]
-			) => {
-				console.log("handleMedications:", parameters);
-
-				if (!parameters) {
-					console.error("No parameters received");
-					return;
-				}
-
-				setConversationData((prev) => ({
-					...prev,
-					medications: {
-						...(parameters.medications && {
-							medications: parameters.medications,
-						}),
-						stepCompleted: parameters.stepCompleted,
-					},
-				}));
-
-				setAppState({ step: "medications" });
-			};
-
 			const sessionConfig = {
-				agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID,
-				clientTools: {
-					UserAccountInfo: handleUserDetails,
-					HealthConditions: handleHealthConditions,
-					Medications: handleMedications,
-				},
+				agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || '',
 				onConnect: ({ conversationId }: { conversationId: string }) => {
 					console.log("Connected to agent:", conversationId);
 					setConversationId(conversationId);
-					setAppState({
-						step: "userDetails",
-					});
 				},
 				onError: (error: any) => {
 					console.error("Connection error:", error);
 					toast.error("Connection error occurred");
-					setConversationId(null);
-					setAppState({ step: "init" });
+				},
+				onAgentSpeechStart: () => {
+					console.log("Agent speech started");
+					setIsSpeaking(true);
+				},
+				onAgentSpeechEnd: () => {
+					console.log("Agent speech ended");
+					setIsSpeaking(false);
+				},
+				onMessage: (message: any) => {
+					console.log("Message received:", message);
 				},
 				onDisconnect: () => {
 					console.log("Disconnected from agent");
+					setIsSpeaking(false);
 					setConversationId(null);
-					setAppState({ step: "init" });
-				},
-			} as const;
+				}
+			};
 
-			const conversationId = await conversation?.startSession(
-				sessionConfig as any
-			);
+			await conversation?.startSession(sessionConfig);
 		} catch (error) {
 			console.error("Error starting call:", error);
 			toast.error("Failed to start conversation");
-			setConversationId(null);
-			if (streamRef.current) {
-				streamRef.current.getTracks().forEach((track) => track.stop());
-				streamRef.current = null;
-			}
 		}
 	};
 
 	return (
-		<>
-			<button
-				onClick={conversation.status === "disconnected" ? startCall : undefined}
-				className={`${Style.pulse} ${
-					conversation.status === "connected" ? Style.pulseConnected : ""
-				}`}
-			>
-				{conversation.status === "disconnected"
-					? "Tap to connect"
-					: conversation.status === "connecting"
-					? "Connecting..."
-					: ""}
-			</button>
-
-			{conversation.status === "connected" && (
-				<div
-					className={`${Style.bars} ${
-						conversation.isSpeaking ? Style.speaking : ""
+		<div className="w-full h-[calc(100vh-64px)] relative">
+			{!conversationId && (
+				<button
+					onClick={conversation.status === "disconnected" ? startCall : undefined}
+					className={`${Style.pulse} ${
+						conversationId ? Style.pulseConnected : ""
 					}`}
 				>
-					<div />
-					<div />
-					<div />
-					<div />
-					<div />
-					<div />
-					<div />
-					<div />
+					Tap to connect
+				</button>
+			)}
+
+			{conversationId && (
+				<div className="space-y-6">
+					<Header isSpeaking={isSpeaking} />
+					<div className="p-6">
+						<HealthDashboard />
+					</div>
 				</div>
 			)}
-		</>
+		</div>
 	);
 };
 
