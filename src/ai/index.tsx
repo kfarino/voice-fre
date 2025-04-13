@@ -7,12 +7,12 @@ import Style from "./style.module.css";
 import HealthDashboard from '@/components/HealthDashboard';
 import Header from '@/components/Header';
 
-const Ai = () => {
-	const conversation = useConversation();
+const Ai: React.FC = () => {
 	const [conversationId, setConversationId] = useState<string | null>(null);
 	const [hasAudioAccess, setHasAudioAccess] = useState(false);
 	const [isSpeaking, setIsSpeaking] = useState(false);
 	const streamRef = useRef<MediaStream | null>(null);
+	const conversation = useConversation();
 
 	useEffect(() => {
 		// Check if API key is available
@@ -63,86 +63,66 @@ const Ai = () => {
 	}, []);
 
 	const endCall = async () => {
-		if (!conversationId) {
-			toast.error("Conversation not found");
-			return;
-		}
-
 		try {
 			await conversation?.endSession();
 			if (streamRef.current) {
 				streamRef.current.getTracks().forEach((track) => track.stop());
-				streamRef.current = null;
 			}
 			setConversationId(null);
+			setIsSpeaking(false);
 		} catch (error) {
 			console.error("Error ending call:", error);
-			toast.error("Failed to end conversation");
+			toast.error("Failed to end call");
 		}
 	};
 
 	const startCall = async () => {
-		try {
-			if (!hasAudioAccess) {
-				const stream = await requestAudioPermissions();
-				if (!stream) return;
-			}
+		if (!hasAudioAccess) {
+			await requestAudioPermissions();
+		}
 
-			const sessionConfig = {
+		try {
+			await conversation?.startSession({
 				agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || '',
-				onConnect: ({ conversationId }: { conversationId: string }) => {
+				onConnect: ({ conversationId }) => {
 					console.log("Connected to agent:", conversationId);
 					setConversationId(conversationId);
 				},
-				onError: (error: any) => {
-					console.error("Connection error:", error);
+				onError: (message: string) => {
+					console.error("Connection error:", message);
 					toast.error("Connection error occurred");
-				},
-				onAgentSpeechStart: () => {
-					console.log("Agent speech started");
-					setIsSpeaking(true);
-				},
-				onAgentSpeechEnd: () => {
-					console.log("Agent speech ended");
-					setIsSpeaking(false);
 				},
 				onMessage: (message: any) => {
 					console.log("Message received:", message);
+					if (message.type === 'speech_start') {
+						setIsSpeaking(true);
+					} else if (message.type === 'speech_end') {
+						setIsSpeaking(false);
+					}
 				},
 				onDisconnect: () => {
 					console.log("Disconnected from agent");
 					setIsSpeaking(false);
 					setConversationId(null);
 				}
-			};
-
-			await conversation?.startSession(sessionConfig);
+			});
 		} catch (error) {
 			console.error("Error starting call:", error);
-			toast.error("Failed to start conversation");
+			toast.error("Failed to start call");
 		}
 	};
 
 	return (
-		<div className="w-full h-[calc(100vh-64px)] relative">
-			{!conversationId && (
-				<button
-					onClick={conversation.status === "disconnected" ? startCall : undefined}
-					className={`${Style.pulse} ${
-						conversationId ? Style.pulseConnected : ""
-					}`}
-				>
-					Tap to connect
-				</button>
-			)}
-
-			{conversationId && (
-				<div className="space-y-6">
-					<Header isSpeaking={isSpeaking} />
-					<div className="p-6">
-						<HealthDashboard />
-					</div>
+		<div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+			{!conversationId ? (
+				<div className={`${Style.pulse} flex items-center justify-center`} onClick={startCall}>
+					Connect
 				</div>
+			) : (
+				<>
+					<Header isSpeaking={isSpeaking} />
+					<HealthDashboard />
+				</>
 			)}
 		</div>
 	);
