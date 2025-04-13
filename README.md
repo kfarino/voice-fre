@@ -1,60 +1,63 @@
 # Voice FRE (First Run Experience)
 
-A Next.js application that uses ElevenLabs' voice AI to guide users through account creation and health condition collection.
+A voice-enabled health dashboard application built with Next.js and ElevenLabs.
 
 ## Features
 
-- Voice-guided user interface
-- Interactive account creation flow
-- Health conditions management
-- Real-time voice conversation with AI agent
-- Responsive tablet-optimized design
+- Voice interaction with AI assistant
+- Health metrics visualization
+- Medication adherence tracking
+- Vital signs monitoring
 
-## Tech Stack
+## Local Development
 
-- Next.js 15.2.4
-- React 19
-- ElevenLabs Voice AI (@11labs/react)
-- TailwindCSS
+1. Clone the repository
+2. Install dependencies:
+   ```
+   npm install
+   ```
+3. Create a `.env.local` file with the following variables:
+   ```
+   NEXT_PUBLIC_ELEVENLABS_API_KEY=your_api_key
+   NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_agent_id
+   ```
+4. Run the development server:
+   ```
+   npm run dev
+   ```
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
+
+## Deployment to Vercel
+
+### Prerequisites
+
+- A Vercel account
+- ElevenLabs API key and Agent ID
+
+### Deployment Steps
+
+1. Push your code to a GitHub repository
+2. Import the repository in Vercel
+3. Add the following environment variables in Vercel:
+   - `NEXT_PUBLIC_ELEVENLABS_API_KEY`
+   - `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`
+4. Deploy the project
+
+### Environment Variables
+
+The following environment variables are required:
+
+- `NEXT_PUBLIC_ELEVENLABS_API_KEY`: Your ElevenLabs API key
+- `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`: Your ElevenLabs Agent ID
+
+## Technologies Used
+
+- Next.js
+- React
+- ElevenLabs API
+- Recharts
+- Tailwind CSS
 - TypeScript
-
-## Prerequisites
-
-- Node.js 18+ 
-- pnpm
-- ElevenLabs API Key
-- ElevenLabs Agent ID
-
-## Environment Variables
-
-Create a `.env.local` file in the root directory with:
-
-```bash
-# ElevenLabs Configuration
-NEXT_PUBLIC_ELEVENLABS_API_KEY=your_api_key_here
-NEXT_PUBLIC_ELEVENLABS_AGENT_ID=your_agent_id_here
-```
-
-## Getting Started
-
-1. Install dependencies:
-```bash
-pnpm install
-```
-
-2. Run the development server:
-```bash
-pnpm dev
-```
-
-3. Open [http://localhost:3000](http://localhost:3000) with your browser.
-
-## Deployment
-
-This project is optimized for deployment on Vercel. Configure the following environment variables in your Vercel project settings:
-
-- `NEXT_PUBLIC_ELEVENLABS_API_KEY`
-- `NEXT_PUBLIC_ELEVENLABS_AGENT_ID`
 
 ## License
 

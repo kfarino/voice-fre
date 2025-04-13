@@ -25,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ isSpeaking }) => {
             // Add a small delay before stopping animation to prevent abrupt stops
             const timeout = setTimeout(() => {
                 setIsAnimating(false);
-            }, 200);
+            }, 500); // Increased delay for smoother transition
             return () => clearTimeout(timeout);
         }
     }, [isSpeaking]);

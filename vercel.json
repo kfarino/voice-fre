@@ -1,9 +1,14 @@
 {
+  "version": 2,
+  "buildCommand": "npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
   "framework": "nextjs",
-  "buildCommand": "pnpm build",
-  "devCommand": "pnpm dev",
-  "installCommand": "pnpm install",
-  "regions": ["sfo1"],
+  "regions": ["iad1"],
+  "env": {
+    "NEXT_PUBLIC_ELEVENLABS_API_KEY": "@next_public_elevenlabs_api_key",
+    "NEXT_PUBLIC_ELEVENLABS_AGENT_ID": "@next_public_elevenlabs_agent_id"
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -28,6 +33,15 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/api/health",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, no-cache, must-revalidate, proxy-revalidate"
         }
       ]
     }
