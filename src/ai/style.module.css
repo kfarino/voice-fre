@@ -8,7 +8,7 @@
 }
 
 .pulse {
-	position: absolute;
+	position: fixed;
 	z-index: 0;
 	left: 50%;
 	top: 50%;
@@ -18,6 +18,12 @@
 	font-weight: bold;
 	font-size: 20px;
 	color: #fff;
+	cursor: pointer;
+	transition: transform 0.3s ease;
+
+	&:hover {
+		transform: translateX(-50%) translateY(-50%) scale(1.05);
+	}
 
 	&:after {
 		content: "";
@@ -31,6 +37,11 @@
 		background-color: rgb(242 108 58);
 		border-radius: 50%;
 		animation: beat-center 2s ease 0s infinite;
+		transition: background-color 0.3s ease;
+	}
+
+	&:hover:after {
+		background-color: rgb(255 128 78);
 	}
 
 	&:before {
@@ -46,6 +57,10 @@
 		border-radius: 50%;
 		border: 2px solid rgb(242 108 58);
 		animation: beat-out 2s ease-out -0.1s infinite;
+	}
+
+	&:hover:before {
+		border-color: rgb(255 128 78);
 	}
 }
 
@@ -183,6 +198,7 @@
 	margin: 0px 1px;
 	border-radius: 2px;
 	animation: none;
+	transition: height 0.2s ease;
 }
 
 .speaking {
@@ -190,41 +206,25 @@
 }
 
 .speaking > div {
-	animation: sound 0ms -600ms linear infinite alternate;
+	animation: sound 500ms -600ms linear infinite alternate;
 }
 
-.speaking > div:nth-child(2) {
-	animation-duration: 474ms;
-}
-.speaking > div:nth-child(2n + 1) {
-	animation-duration: 433ms;
-}
-.speaking > div:nth-child(3n + 1) {
-	animation-duration: 407ms;
-}
-.speaking > div:nth-child(4n + 1) {
-	animation-duration: 458ms;
-}
-.speaking > div:nth-child(5n + 1) {
-	animation-duration: 400ms;
-}
-.speaking > div:nth-child(6n + 1) {
-	animation-duration: 427ms;
-}
-.speaking > div:nth-child(7n + 1) {
-	animation-duration: 441ms;
-}
-.speaking > div:nth-child(8n + 1) {
-	animation-duration: 419ms;
-}
+.speaking > div:nth-child(1) { animation-duration: 433ms; }
+.speaking > div:nth-child(2) { animation-duration: 474ms; }
+.speaking > div:nth-child(3) { animation-duration: 407ms; }
+.speaking > div:nth-child(4) { animation-duration: 458ms; }
+.speaking > div:nth-child(5) { animation-duration: 400ms; }
+.speaking > div:nth-child(6) { animation-duration: 427ms; }
+.speaking > div:nth-child(7) { animation-duration: 441ms; }
+.speaking > div:nth-child(8) { animation-duration: 419ms; }
 
 @keyframes sound {
 	0% {
-		opacity: 0.3;
-		height: 10%;
+		height: 20%;
+		opacity: 0.35;
 	}
 	100% {
-		opacity: 1;
 		height: 100%;
+		opacity: 1;
 	}
 }

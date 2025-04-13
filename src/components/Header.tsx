@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React from "react";
 import Style from "@/ai/style.module.css";
 
 interface HeaderProps {
@@ -16,24 +16,10 @@ const suggestedPrompts = [
 ];
 
 const Header: React.FC<HeaderProps> = ({ isSpeaking }) => {
-    const [isAnimating, setIsAnimating] = useState(false);
-
-    useEffect(() => {
-        if (isSpeaking) {
-            setIsAnimating(true);
-        } else {
-            // Add a small delay before stopping animation to prevent abrupt stops
-            const timeout = setTimeout(() => {
-                setIsAnimating(false);
-            }, 500); // Increased delay for smoother transition
-            return () => clearTimeout(timeout);
-        }
-    }, [isSpeaking]);
-
     return (
         <div className="w-full bg-black border-b border-[#F26C3A]/20 p-4">
             <div className="flex justify-center mb-8">
-                <div className={`${Style.bars} ${isAnimating ? Style.speaking : ""}`}>
+                <div className={`${Style.bars} ${isSpeaking ? Style.speaking : ""}`}>
                     <div />
                     <div />
                     <div />
