@@ -7,6 +7,12 @@ import Style from "./style.module.css";
 import HealthDashboard from '@/components/HealthDashboard';
 import Header from '@/components/Header';
 
+interface Message {
+	type: 'speech_start' | 'speech_end';
+	message?: string;
+	source?: string;
+}
+
 const Ai: React.FC = () => {
 	const [conversationId, setConversationId] = useState<string | null>(null);
 	const [hasAudioAccess, setHasAudioAccess] = useState(false);
@@ -84,15 +90,15 @@ const Ai: React.FC = () => {
 		try {
 			await conversation?.startSession({
 				agentId: process.env.NEXT_PUBLIC_ELEVENLABS_AGENT_ID || '',
-				onConnect: ({ conversationId }) => {
-					console.log("Connected to agent:", conversationId);
-					setConversationId(conversationId);
+				onConnect: ({ conversationId: id }) => {
+					console.log("Connected to agent:", id);
+					setConversationId(id);
 				},
 				onError: (message: string) => {
 					console.error("Connection error:", message);
 					toast.error("Connection error occurred");
 				},
-				onMessage: (message: any) => {
+				onMessage: (message: Message) => {
 					console.log("Message received:", message);
 					if (message.type === 'speech_start') {
 						setIsSpeaking(true);
@@ -113,7 +119,10 @@ const Ai: React.FC = () => {
 	};
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
+		<div className={!conversationId ? 
+			"h-screen overflow-hidden flex items-center justify-center bg-black text-white" : 
+			"min-h-screen flex flex-col bg-black text-white"
+		}>
 			{!conversationId ? (
 				<div className={`${Style.pulse} flex items-center justify-center`} onClick={startCall}>
 					Connect
