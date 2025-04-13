@@ -7,11 +7,11 @@ import Style from "./style.module.css";
 import HealthDashboard from '@/components/HealthDashboard';
 import Header from '@/components/Header';
 
-interface Message {
-	type: 'speech_start' | 'speech_end';
-	message?: string;
-	source?: string;
-}
+type MessageType = {
+	message: string;
+	source: string;
+	type?: 'speech_start' | 'speech_end';
+};
 
 const Ai: React.FC = () => {
 	const [conversationId, setConversationId] = useState<string | null>(null);
@@ -98,11 +98,11 @@ const Ai: React.FC = () => {
 					console.error("Connection error:", message);
 					toast.error("Connection error occurred");
 				},
-				onMessage: (message: Message) => {
-					console.log("Message received:", message);
-					if (message.type === 'speech_start') {
+				onMessage: (props: MessageType) => {
+					console.log("Message received:", props);
+					if (props.type === 'speech_start') {
 						setIsSpeaking(true);
-					} else if (message.type === 'speech_end') {
+					} else if (props.type === 'speech_end') {
 						setIsSpeaking(false);
 					}
 				},
@@ -120,8 +120,8 @@ const Ai: React.FC = () => {
 
 	return (
 		<div className={!conversationId ? 
-			"h-screen overflow-hidden flex items-center justify-center bg-black text-white" : 
-			"min-h-screen flex flex-col bg-black text-white"
+			"flex items-center justify-center bg-black text-white" : 
+			"w-full bg-black text-white"
 		}>
 			{!conversationId ? (
 				<div className={`${Style.pulse} flex items-center justify-center`} onClick={startCall}>
