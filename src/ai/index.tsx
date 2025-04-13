@@ -21,14 +21,12 @@ const Ai: React.FC = () => {
 	const conversation = useConversation();
 
 	useEffect(() => {
-		// Check if API key is available
 		if (!process.env.NEXT_PUBLIC_ELEVENLABS_API_KEY) {
 			console.error("ElevenLabs API key is not configured");
 			toast.error("ElevenLabs API key is missing");
 		}
 	}, []);
 
-	// Audio stream handling
 	const requestAudioPermissions = async () => {
 		if (streamRef.current) {
 			streamRef.current.getTracks().forEach((track) => track.stop());
@@ -56,7 +54,6 @@ const Ai: React.FC = () => {
 		}
 	};
 
-	// Cleanup audio stream on unmount
 	useEffect(() => {
 		return () => {
 			if (streamRef.current) {
@@ -67,20 +64,6 @@ const Ai: React.FC = () => {
 			}
 		};
 	}, []);
-
-	const endCall = async () => {
-		try {
-			await conversation?.endSession();
-			if (streamRef.current) {
-				streamRef.current.getTracks().forEach((track) => track.stop());
-			}
-			setConversationId(null);
-			setIsSpeaking(false);
-		} catch (error) {
-			console.error("Error ending call:", error);
-			toast.error("Failed to end call");
-		}
-	};
 
 	const startCall = async () => {
 		if (!hasAudioAccess) {
@@ -112,7 +95,7 @@ const Ai: React.FC = () => {
 					setConversationId(null);
 				}
 			});
-		} catch (error) {
+		} catch (error: unknown) {
 			console.error("Error starting call:", error);
 			toast.error("Failed to start call");
 		}
@@ -120,8 +103,8 @@ const Ai: React.FC = () => {
 
 	return (
 		<div className={!conversationId ? 
-			"flex items-center justify-center bg-black text-white" : 
-			"w-full bg-black text-white"
+			"flex items-center justify-center bg-[#000000] text-white h-full" : 
+			"w-full bg-[#000000] text-white"
 		}>
 			{!conversationId ? (
 				<div className={`${Style.pulse} flex items-center justify-center`} onClick={startCall}>

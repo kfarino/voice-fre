@@ -1,4 +1,4 @@
-// Remove or comment out unused functions
+// Remove unused functions
 // const formatPhoneNumber = (phone: string) => {
 //   return phone.replace(/(\d{3})(\d{3})(\d{4})/, '($1) $2-$3');
 // };
