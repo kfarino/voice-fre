@@ -55,5 +55,10 @@
     "deploymentEnabled": {
       "kevin_explore": true
     }
+  },
+  "github": {
+    "enabled": true,
+    "silent": true,
+    "autoAlias": true
   }
 } 
