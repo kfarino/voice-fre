@@ -191,6 +191,7 @@ const Ai = () => {
 				},
 			};
 
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
 			await conversation?.startSession(sessionConfig as any);
 		} catch (error) {
 			console.error("Error starting call:", error);
