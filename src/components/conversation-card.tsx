@@ -2,6 +2,7 @@
 
 import { useConversation } from "@11labs/react";
 import { useMemo } from "react";
+import { ConversationData, PrimaryUserDetails, CaregiverDetails } from "@/context/ConversationData";
 
 // Constants
 const TEXT_STYLES = {
@@ -36,18 +37,6 @@ type Medication = {
 	doses?: Dose[];
 	asNeeded?: number;
 };
-
-interface ConversationData {
-	firstName?: string;
-	lastName?: string;
-	role?: "Primary User" | "Caregiver";
-	dateOfBirth?: string;
-	phone?: string;
-	healthConditions?: Array<{ key: string; name: string }>;
-	showMedications?: boolean;
-	medications?: Medication[];
-	currentMedicationId?: string;
-}
 
 interface ConversationCardProps {
 	isOpen: boolean;
@@ -117,136 +106,38 @@ const reconstructDays = (days: string[]): string[] => {
 	return matches.map((match) => FULL_DAY_MAP[match] || match);
 };
 
-const groupDosesByFrequency = (
-	doses: Dose[]
-): Record<
-	string,
-	{ times: string[]; pillCount: number | Record<string, number> }
-> => {
-	const groups: Record<
-		string,
-		{ times: string[]; pillCount: number | Record<string, number> }
-	> = {};
-
-	if (!doses || doses.length === 0) {
-		console.log("No doses to group");
-		return groups;
+const formatFrequency = (frequency: string): string => {
+	switch (frequency) {
+		case "daily":
+			return "Daily";
+		case "weekly":
+			return "Weekly";
+		case "monthly":
+			return "Monthly";
+		default:
+			return frequency;
 	}
-
-	console.log("Grouping doses:", doses);
-
-	// Sort doses by time for consistent display
-	const sortedDoses = [...doses].sort((a, b) => {
-		if (!a.timeOfDay || !b.timeOfDay) return 0;
-		const timeA = formatDoseTime(a.timeOfDay);
-		const timeB = formatDoseTime(b.timeOfDay);
-		return timeA.localeCompare(timeB);
-	});
-
-	// Group doses by their frequency
-	sortedDoses.forEach((dose) => {
-		if (!dose.timeOfDay || !Array.isArray(dose.specificDays)) {
-			console.log("Skipping invalid dose:", dose);
-			return;
-		}
-
-		const formattedTime = formatDoseTime(dose.timeOfDay);
-		const fullDays = reconstructDays(dose.specificDays);
-
-		console.log("Processing dose:", {
-			time: formattedTime,
-			days: fullDays,
-			pillCount: dose.pillCount,
-		});
-
-		const isEveryday = fullDays.length === 7;
-		const frequency = isEveryday
-			? "Everyday"
-			: fullDays
-					.map((day) => formatDayName(day))
-					.filter(Boolean)
-					.sort((a, b) => {
-						const dayOrder = [
-							"Mon",
-							"Tues",
-							"Wed",
-							"Thurs",
-							"Fri",
-							"Sat",
-							"Sun",
-						];
-						return dayOrder.indexOf(a) - dayOrder.indexOf(b);
-					})
-					.join(", ");
-
-		console.log("Determined frequency:", frequency);
-
-		// Create or update the frequency group
-		if (!groups[frequency]) {
-			groups[frequency] = {
-				times: [formattedTime],
-				pillCount: dose.pillCount ?? 1,
-			};
-			console.log("Created new frequency group:", frequency, groups[frequency]);
-		} else {
-			// Add time if not already present
-			if (!groups[frequency].times.includes(formattedTime)) {
-				groups[frequency].times.push(formattedTime);
-				// If pillCount was a number, convert to object
-				if (typeof groups[frequency].pillCount === "number") {
-					const defaultCount = groups[frequency].pillCount;
-					groups[frequency].pillCount = groups[frequency].times.reduce(
-						(acc, time) => ({
-							...acc,
-							[time]: defaultCount,
-						}),
-						{}
-					);
-				}
-			}
-			// Update pill count for this specific time
-			if (typeof groups[frequency].pillCount === "object") {
-				groups[frequency].pillCount[formattedTime] = dose.pillCount ?? 1;
-			}
-			console.log(
-				"Updated existing frequency group:",
-				frequency,
-				groups[frequency]
-			);
-		}
-	});
-
-	// Sort times within each frequency group
-	Object.values(groups).forEach((group) => {
-		group.times.sort((timeA, timeB) => {
-			const getTimeValue = (time: string) => {
-				const isPM = time.endsWith("PM");
-				const [hourStr, minuteStr] = time.replace(/(AM|PM)$/, "").split(":");
-				let hour = parseInt(hourStr);
-				const minute = parseInt(minuteStr || "0");
-
-				// Adjust hour for PM and handle 12 AM/PM cases
-				if (isPM && hour !== 12) hour += 12;
-				if (!isPM && hour === 12) hour = 0;
-
-				return hour * 60 + minute;
-			};
-
-			return getTimeValue(timeA) - getTimeValue(timeB);
-		});
-	});
-
-	console.log("Final grouped doses:", groups);
-	return groups;
 };
 
-const formatMedicationStrength = (strength: string | undefined): string => {
+const formatMedicationStrength = (strength?: string): string => {
 	if (!strength) return "";
-	return strength
-		.replace(/milligram/i, "mg")
-		.replace(/microgram/i, "mcg")
-		.replace(/gram/i, "g")
-		.replace(/milliliter/i, "ml");
+	return strength;
+};
+
+const groupDosesByFrequency = (doses: Dose[]): Record<string, { times: string[]; pillCount: number }> => {
+	const grouped: Record<string, { times: string[]; pillCount: number }> = {};
+	
+	doses.forEach((dose) => {
+		if (!dose.timeOfDay || !dose.pillCount) return;
+		
+		const frequency = dose.specificDays?.length === 7 ? "daily" : "weekly";
+		if (!grouped[frequency]) {
+			grouped[frequency] = { times: [], pillCount: dose.pillCount };
+		}
+		grouped[frequency].times.push(dose.timeOfDay);
+	});
+	
+	return grouped;
 };
 
 const BouncingPills = () => {
@@ -291,17 +182,43 @@ export function ConversationCard({
 	// Memoize medications data processing
 	const processedMedications = useMemo(
 		() =>
-			userData.medications?.map((medication) => ({
+			userData?.medications?.medications?.map((medication, index) => ({
+				id: `med-${index}`,
 				...medication,
 				groupedDoses: medication.doses
 					? groupDosesByFrequency(medication.doses)
 					: {},
 				displayName: `${medication.name} ${formatMedicationStrength(
 					medication.strength
-				)} (${medication.form})`,
-			})),
-		[userData.medications]
+				)}`,
+			})) ?? [],
+		[userData?.medications?.medications]
 	);
+
+	const formattedName = userData?.userDetails
+		? `${userData.userDetails.firstName} ${userData.userDetails.lastName}`
+		: "N/A";
+
+	const formattedPhone = userData?.userDetails?.phoneNumber ?? "N/A";
+
+	const formattedDateOfBirth = (() => {
+		const details = userData?.userDetails;
+		if (!details) return "N/A";
+		
+		if (details.role === "Primary User") {
+			return (details as PrimaryUserDetails).dateOfBirth ?? "N/A";
+		}
+		
+		if (details.role === "Caregiver") {
+			return (details as CaregiverDetails).lovedOne.lovedOneDateOfBirth ?? "N/A";
+		}
+		
+		return "N/A";
+	})();
+
+	const formattedRole = userData?.userDetails?.role ?? "N/A";
+
+	const hasMedications = Boolean(userData?.medications?.medications?.length);
 
 	return (
 		<div className="tablet-container">
@@ -311,7 +228,7 @@ export function ConversationCard({
 						<div className="flex flex-col items-center w-full">
 							<div className="flex flex-col items-center gap-[40px] w-full">
 								<div className="text-center">
-									<span className="text-white text-[48px] font-normal">
+									<span className="text-white text-[40px] font-normal">
 										Create Your Account
 									</span>
 								</div>
@@ -330,7 +247,7 @@ export function ConversationCard({
 											<span
 												className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} border-b-2 border-[#F26C3A]`}
 											>
-												{userData.role || "\u00A0"}
+												{formattedRole}
 											</span>
 										</div>
 
@@ -338,7 +255,7 @@ export function ConversationCard({
 											<span
 												className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} border-b-2 border-[#F26C3A]`}
 											>
-												{userData.dateOfBirth || "\u00A0"}
+												{formattedDateOfBirth}
 											</span>
 										</div>
 
@@ -356,20 +273,20 @@ export function ConversationCard({
 						</div>
 					)}
 
-					{showHealthConditions && !userData.showMedications && (
+					{showHealthConditions && !hasMedications && (
 						<div className="flex flex-col items-center w-full">
 							<div className={`text-center ${MARGINS.bottom60}`}>
-								<span className="text-white text-[48px] font-normal">
+								<span className="text-white text-[40px] font-normal">
 									Health Conditions
 								</span>
 							</div>
 							<div className="flex flex-col gap-[40px] items-center w-full">
-								{userData.healthConditions?.map((condition) => (
-									<div key={condition.key} className="text-center">
+								{userData?.healthConditions?.conditions?.map((condition, index) => (
+									<div key={`condition-${index}`} className="text-center">
 										<span
 											className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} border-b-2 border-[#F26C3A]`}
 										>
-											{condition.name}
+											{condition}
 										</span>
 									</div>
 								))}
@@ -377,10 +294,10 @@ export function ConversationCard({
 						</div>
 					)}
 
-					{userData.showMedications && (
+					{hasMedications && (
 						<div className="flex flex-col w-full">
 							<div className="text-center mb-[60px]">
-								<span className="text-white text-[48px] font-normal">
+								<span className="text-white text-[40px] font-normal">
 									Medication Details
 								</span>
 							</div>
@@ -430,24 +347,12 @@ export function ConversationCard({
 														{Object.entries(medication.groupedDoses).map(
 															([frequency, { times, pillCount }], index) => (
 																<div
-																	key={index}
-																	className="flex flex-col gap-2"
+																	key={`${medication.id}-${index}`}
+																	className={`${TEXT_STYLES.white} ${TEXT_STYLES.base} ${MARGINS.bottom8}`}
 																>
-																	{times.map((time, timeIndex) => (
-																		<div
-																			key={timeIndex}
-																			className={`${TEXT_STYLES.white} ${TEXT_STYLES.base}`}
-																		>
-																			{frequency} {time}{" "}
-																			{typeof pillCount === "object"
-																				? `${pillCount[time]} pill${
-																						pillCount[time] === 1 ? "" : "s"
-																				  }/dose`
-																				: `${pillCount} pill${
-																						pillCount === 1 ? "" : "s"
-																				  }/dose`}
-																		</div>
-																	))}
+																	{formatFrequency(frequency)}:{" "}
+																	{times.join(", ")} ({pillCount}{" "}
+																	{pillCount === 1 ? "pill" : "pills"})
 																</div>
 															)
 														)}
@@ -455,24 +360,6 @@ export function ConversationCard({
 												)}
 											</div>
 										</div>
-
-										{processedMedications &&
-											medIndex === processedMedications.length - 1 &&
-											medication.doses &&
-											medication.doses.length > 0 && (
-												<div className="flex flex-col w-full">
-													<div
-														className={`${TEXT_STYLES.orange} ${TEXT_STYLES.base} ${MARGINS.top40} ${MARGINS.bottom8}`}
-													>
-														{processedMedications.length + 1}. &lt;Name&gt;
-													</div>
-													<div
-														className={`${TEXT_STYLES.orange} ${TEXT_STYLES.base} ${PADDING.left200}`}
-													>
-														&lt;Frequency&gt; &lt;Times&gt; &lt;Pills/dose&gt;
-													</div>
-												</div>
-											)}
 									</div>
 								))}
 							</div>

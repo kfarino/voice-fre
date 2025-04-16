@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import mockData from "./mockData";
 
 type SharedUserDetails = {
 	firstName: string;
@@ -9,12 +10,12 @@ type SharedUserDetails = {
 	stepCompleted: boolean; // at the end of the conversation user must confirm their details
 };
 
-type PrimaryUserDetails = SharedUserDetails & {
+export type PrimaryUserDetails = SharedUserDetails & {
 	role: "Primary User";
 	dateOfBirth: string; // Format: "January 11, 1990"
 };
 
-type CaregiverDetails = SharedUserDetails & {
+export type CaregiverDetails = SharedUserDetails & {
 	role: "Caregiver";
 	relationshipToLovedOne: string;
 	lovedOne: {
