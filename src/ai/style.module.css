@@ -3,7 +3,7 @@
 	z-index: 0;
 	left: 50%;
 	top: 50%;
-	transform: translateX(-50%) translateY(-50%);
+	transform: translateX(-50%) translateY(calc(-50% + 25px));
 	width: 240px;
 	height: 240px;
 	font-weight: bold;

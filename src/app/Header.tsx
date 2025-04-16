@@ -35,15 +35,15 @@ const Header: React.FC = () => {
 	return (
 		<div className="w-full text-white py-4 px-8 flex flex-col relative z-10">
 			<div className="flex justify-between items-center">
-				<div className="text-[25px] font-medium">
+				<div className="text-[12px] font-medium">
 					{currentTime ? format(currentTime, "EEE, MMM d") : ""}
 				</div>
-				<div className="text-[25px] font-medium absolute left-1/2 transform -translate-x-1/2">
+				<div className="text-[12px] font-medium absolute left-1/2 transform -translate-x-1/2">
 					{currentTime ? format(currentTime, "h:mm a") : ""}
 				</div>
 
 				<div>
-					<Wifi size={28} />
+					<Wifi size={14} />
 				</div>
 			</div>
 
