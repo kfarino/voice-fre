@@ -29,15 +29,6 @@ type Dose = {
 	asNeeded?: boolean;
 };
 
-type Medication = {
-	id: string;
-	name?: string;
-	strength?: string;
-	form?: string;
-	doses?: Dose[];
-	asNeeded?: number;
-};
-
 interface ConversationCardProps {
 	isOpen: boolean;
 	setIsOpen: (isOpen: boolean) => void;
@@ -53,59 +44,6 @@ interface ConversationCardProps {
 }
 
 // Helper functions
-const formatDoseTime = (timeOfDay: string): string => {
-	if (!timeOfDay) return "";
-
-	// Remove any spaces between time and AM/PM
-	timeOfDay = timeOfDay.replace(/ (AM|PM)$/i, "$1");
-
-	// If it's already in the correct format (H:MMAM or H:MMPM), just standardize the AM/PM case
-	if (/^\d{1,2}:\d{2}(AM|PM)$/i.test(timeOfDay)) {
-		return timeOfDay.toUpperCase();
-	}
-
-	// Log warning for invalid format
-	console.warn(
-		`Invalid time format received: "${timeOfDay}". Expected format: "H:MMAM" or "H:MMPM"`
-	);
-	return timeOfDay;
-};
-
-const DAY_MAP: Record<string, string> = {
-	Monday: "Mon",
-	Tuesday: "Tues",
-	Wednesday: "Wed",
-	Thursday: "Thurs",
-	Friday: "Fri",
-	Saturday: "Sat",
-	Sunday: "Sun",
-};
-
-const FULL_DAY_MAP: Record<string, string> = {
-	M: "Monday",
-	T: "Tuesday",
-	W: "Wednesday",
-	Th: "Thursday",
-	F: "Friday",
-	S: "Saturday",
-	Su: "Sunday",
-};
-
-const formatDayName = (day: string): string => DAY_MAP[day] || day;
-
-const reconstructDays = (days: string[]): string[] => {
-	if (days.length === 1) {
-		const day = days[0];
-		if (FULL_DAY_MAP[day]) {
-			return [FULL_DAY_MAP[day]];
-		}
-	}
-
-	const dayString = days.join("");
-	const matches = dayString.match(/M|T|W|Th|F|S|Su/g) || [];
-	return matches.map((match) => FULL_DAY_MAP[match] || match);
-};
-
 const formatFrequency = (frequency: string): string => {
 	switch (frequency) {
 		case "daily":
