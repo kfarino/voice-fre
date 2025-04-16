@@ -178,7 +178,7 @@ const Ai = () => {
 						step: "userDetails",
 					});
 				},
-				onError: (error: any) => {
+				onError: (error: Error) => {
 					console.error("Connection error:", error);
 					toast.error("Connection error occurred");
 					setConversationId(null);
@@ -191,9 +191,7 @@ const Ai = () => {
 				},
 			} as const;
 
-			const conversationId = await conversation?.startSession(
-				sessionConfig as any
-			);
+			await conversation?.startSession(sessionConfig as any);
 		} catch (error) {
 			console.error("Error starting call:", error);
 			toast.error("Failed to start conversation");

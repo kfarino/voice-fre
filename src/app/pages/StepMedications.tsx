@@ -1,7 +1,7 @@
-import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
-import { useConversationData } from "@/context/ConversationData";
-import { Pill } from "lucide-react";
 import React from "react";
+import { useConversationData } from "@/context/ConversationData";
+import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
+import { Pill } from "lucide-react";
 
 const StepMedications: React.FC = () => {
 	const conversationData = useConversationData();
@@ -12,7 +12,7 @@ const StepMedications: React.FC = () => {
 				<div className="flex flex-col items-center justify-center py-8 border border-dashed border-white/20 rounded-lg">
 					<Pill className="h-16 w-16 text-white/30 mb-4" />
 					<p className="text-white/60 text-xl mb-2">No medications added yet</p>
-					<p className="text-white/80 text-lg">Say "Add medication" to begin</p>
+					<p className="text-white/80 text-lg">Say &quot;Add medication&quot; to begin</p>
 				</div>
 			) : (
 				<div className="rounded-lg overflow-hidden">

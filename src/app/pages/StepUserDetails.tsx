@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { User, Calendar, BellRing, Phone } from "lucide-react";
+import React from "react";
+import { Calendar, BellRing, Phone } from "lucide-react";
 import { useConversationData } from "@/context/ConversationData";
 
 const StepUserDetails: React.FC = () => {
