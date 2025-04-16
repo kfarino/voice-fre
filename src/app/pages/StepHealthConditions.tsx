@@ -1,5 +1,5 @@
 import React from "react";
-import { Heart, Activity, Brain } from "lucide-react";
+import { Heart } from "lucide-react";
 import { useConversationData } from "@/context/ConversationData";
 
 const StepHealthConditions: React.FC = () => {

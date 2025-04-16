@@ -59,7 +59,7 @@ const Ai = () => {
 		};
 	}, []);
 
-	const endCall = async () => {
+	const handleEndCall = async () => {
 		if (!conversationId) {
 			toast.error("Conversation not found");
 			return;
@@ -189,7 +189,7 @@ const Ai = () => {
 					setConversationId(null);
 					setAppState({ step: "init" });
 				},
-			} as const;
+			};
 
 			await conversation?.startSession(sessionConfig as any);
 		} catch (error) {
@@ -206,7 +206,7 @@ const Ai = () => {
 	return (
 		<>
 			<button
-				onClick={conversation.status === "disconnected" ? startCall : undefined}
+				onClick={conversation.status === "disconnected" ? startCall : handleEndCall}
 				className={`${Style.pulse} ${
 					conversation.status === "connected" ? Style.pulseConnected : ""
 				}`}

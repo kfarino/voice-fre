@@ -64,16 +64,6 @@ interface ConversationCardProps {
 }
 
 // Helper functions
-const formatPhoneNumber = (phone: string): string => {
-	if (!phone) return "";
-	const cleaned = phone.replace(/\D/g, "");
-	const match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
-	if (match) {
-		return `(${match[1]}) ${match[2]}-${match[3]}`;
-	}
-	return phone;
-};
-
 const formatDoseTime = (timeOfDay: string): string => {
 	if (!timeOfDay) return "";
 
@@ -90,14 +80,6 @@ const formatDoseTime = (timeOfDay: string): string => {
 		`Invalid time format received: "${timeOfDay}". Expected format: "H:MMAM" or "H:MMPM"`
 	);
 	return timeOfDay;
-};
-
-const formatName = (name: string | undefined): string => {
-	if (!name) return "";
-	return name
-		.split(" ")
-		.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-		.join(" ");
 };
 
 const DAY_MAP: Record<string, string> = {

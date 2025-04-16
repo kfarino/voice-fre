@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import mockData from "./mockData";
 
 type SharedUserDetails = {
 	firstName: string;
