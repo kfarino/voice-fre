@@ -107,7 +107,7 @@ const Ai = () => {
 						},
 					};
 
-					// If all required fields are filled and isConfirmed is true, move to health conditions
+					// Transition to health conditions immediately after user details are confirmed
 					if (parameters?.stepCompleted) {
 						setAppState({
 							step: "healthConditions",
@@ -138,7 +138,11 @@ const Ai = () => {
 					},
 				}));
 
-				setAppState({ step: "healthConditions" });
+				if (parameters.stepCompleted) {
+					setAppState({ step: "medications" });
+				} else {
+					setAppState({ step: "healthConditions" });
+				}
 			};
 
 			const handleMedications = async (

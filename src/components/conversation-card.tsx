@@ -57,6 +57,11 @@ const formatFrequency = (frequency: string): string => {
 	}
 };
 
+const formatMedicationName = (name?: string): string => {
+	if (!name) return "";
+	return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+};
+
 const formatMedicationStrength = (strength?: string): string => {
 	if (!strength) return "";
 	return strength;
@@ -126,7 +131,7 @@ export function ConversationCard({
 				groupedDoses: medication.doses
 					? groupDosesByFrequency(medication.doses)
 					: {},
-				displayName: `${medication.name} ${formatMedicationStrength(
+				displayName: `${formatMedicationName(medication.name)} ${formatMedicationStrength(
 					medication.strength
 				)}`,
 			})) ?? [],

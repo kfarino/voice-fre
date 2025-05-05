@@ -3,6 +3,11 @@ import { useConversationData } from "@/context/ConversationData";
 import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import { Pill } from "lucide-react";
 
+const formatMedicationName = (name?: string): string => {
+	if (!name) return "";
+	return name.charAt(0).toUpperCase() + name.slice(1).toLowerCase();
+};
+
 const StepMedications: React.FC = () => {
 	const conversationData = useConversationData();
 
@@ -25,7 +30,7 @@ const StepMedications: React.FC = () => {
 								>
 									<TableCell className="text-white py-4 w-[45%]">
 										<div className="text-2xl font-bold">
-											{med.name} {med.strength}
+											{formatMedicationName(med.name)} {med.strength}
 										</div>
 									</TableCell>
 									<TableCell className="w-[55%]">
